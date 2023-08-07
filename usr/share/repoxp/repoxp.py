@@ -37,12 +37,12 @@ class Main(Gtk.Window):
             self.set_titlebar(headerbar)
             self.package_name = None
 
-            # fn.logger.info("Synchronizing pacman package databases")
-            # thread_pacman_sync_db = Thread(
-            #     target=fn.sync_package_db,
-            #     daemon=True,
-            # )
-            # thread_pacman_sync_db.start()
+            fn.logger.info("Synchronizing pacman package databases")
+            thread_pacman_sync_db = Thread(
+                target=fn.sync_package_db,
+                daemon=True,
+            )
+            thread_pacman_sync_db.start()
 
             try:
                 thread_pacman_sync_data = Thread(
