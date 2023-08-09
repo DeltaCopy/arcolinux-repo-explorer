@@ -154,6 +154,7 @@ class PackageDialog(Gtk.Dialog):
         lbl_installed_version_title.set_markup("<b>Installed Version</b>")
 
         lbl_installed_version_value = Gtk.Label(xalign=0, yalign=0)
+        lbl_installed_version_value.set_selectable(True)
 
         if fn.check_package_installed(package_name):
             # lbl_installed_value.set_text("Yes")
@@ -166,7 +167,6 @@ class PackageDialog(Gtk.Dialog):
 
             lbl_padding_installed_version = Gtk.Label(xalign=0, yalign=0)
             lbl_padding_installed_version.set_text("  ")
-            lbl_padding_installed_version.set_selectable(True)
 
             grid_package_details.attach(lbl_installed_title, 0, 5, 1, 1)
 

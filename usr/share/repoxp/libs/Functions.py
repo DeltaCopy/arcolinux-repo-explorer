@@ -56,6 +56,7 @@ class Functions(object):
         if not os.path.exists(self.zst_download_path):
             makedirs(self.zst_download_path)
 
+        self.permissions("%s/repoxp/" % self.home)
         self.permissions(self.zst_download_path)
 
     def permissions(self, dst):
@@ -153,26 +154,31 @@ class Functions(object):
         installed = False
 
         for package in pacman_data:
+            installed = False
+            installed_version = ""
             if package[0] == repo:
                 for installed_package in installed_packages_list:
                     if installed_package[0] == package[1]:
                         installed = True
                         installed_version = installed_package[1]
+
                         break
                 if installed == True:
                     self.installed_count += 1
+
                 packages.append(
                     (
                         package[1],
                         package[2],
+                        installed_version,
                         package[3],
                         installed,
                     )
                 )
-            installed = False
+            # installed = False
 
         if len(packages) > 0:
-            treestore_packages = Gtk.TreeStore(str, str, str, bool)
+            treestore_packages = Gtk.TreeStore(str, str, str, str, bool)
 
             # allow sorting by installed date
 

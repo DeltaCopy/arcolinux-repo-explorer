@@ -185,6 +185,7 @@ class Main(Gtk.Window):
                     [
                         "Name",
                         "Latest Version",
+                        "Installed Version",
                         "Build Date",
                     ]
                 ):
@@ -195,8 +196,8 @@ class Main(Gtk.Window):
                 renderer = Gtk.CellRendererToggle()
                 # renderer.set_activatable(False)
 
-                col = Gtk.TreeViewColumn("Installed", renderer, active=3)
-                self.treeview_packages.append_column(col)
+                col_installed = Gtk.TreeViewColumn("Installed", renderer, active=4)
+                self.treeview_packages.append_column(col_installed)
 
                 grid_packages = Gtk.Grid()
 
@@ -206,11 +207,13 @@ class Main(Gtk.Window):
                 if self.treeview_packages is not None:
                     # allow sorting by installed date
 
-                    treestore_packages.set_sort_func(2, fn.compare_install_date, None)
-                    treestore_packages.set_sort_column_id(2, Gtk.SortType.DESCENDING)
+                    treestore_packages.set_sort_func(3, fn.compare_install_date, None)
+                    treestore_packages.set_sort_column_id(3, Gtk.SortType.DESCENDING)
+                    col_build_date = self.treeview_packages.get_column(3)
+                    col_build_date.set_sort_column_id(3)
 
-                    col_installed = self.treeview_packages.get_column(3)
-                    col_installed.set_sort_column_id(3)
+                    col_installed = self.treeview_packages.get_column(4)
+                    col_installed.set_sort_column_id(4)
 
                     col_version = self.treeview_packages.get_column(1)
                     col_version.set_sort_column_id(1)
