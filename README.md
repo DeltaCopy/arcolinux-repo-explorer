@@ -17,3 +17,9 @@ The following repositories are explorable:
 ![Package Details Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/b614caa2-0206-4aeb-b124-75563cdc5f20)
 
 The download package option lets you download the associated .zst package file to disk for offline installations.
+
+# Usage
+
+1. git clone this repository
+2. cd arcolinux-repo-explorer/usr/share/repoxp
+3. sudo python repoxp.py
