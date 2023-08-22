@@ -1,3 +1,33 @@
 box#vbox {
   padding-right: 20px;
 }
+infobar#infobar_info {
+  background-color: #5481e5;
+  color: white;
+}
+
+infobar#infobar_error {
+  background-color: #9d261d;
+  color: white;
+}
+
+infobar#infobar_warning {
+  background-color: #ffcc00;
+  color: black;
+}
+
+radiobutton#rb_arco_repo:hover{
+  font-weight: bold;
+}
+
+radiobutton#rb_arco_3rdparty_repo:hover{
+  font-weight: bold;
+}
+
+radiobutton#rb_arco_xl_repo:hover{
+  font-weight: bold;
+}
+
+radiobutton#rb_arco_testing_repo:hover{
+  font-weight: bold;
+}

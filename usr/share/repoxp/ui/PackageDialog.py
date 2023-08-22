@@ -10,7 +10,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Pango
 
 
 class PackageDialog(Gtk.Dialog):
-    def __init__(self, package_name, pacman_data):
+    def __init__(self, package_name, pacman_data, files_list):
         Gtk.Dialog.__init__(self)
 
         package = None
@@ -106,7 +106,7 @@ class PackageDialog(Gtk.Dialog):
         )
 
         lbl_version_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_version_title.set_markup("<b>Version</b>")
+        lbl_version_title.set_markup("<b>Latest Version</b>")
 
         lbl_version_value = Gtk.Label(xalign=0, yalign=0)
         lbl_version_value.set_text(package[2])
@@ -556,6 +556,32 @@ class PackageDialog(Gtk.Dialog):
 
         stack.add_titled(vbox_package_details, "Information", "Information")
 
+        package_files_scrolled_window = Gtk.ScrolledWindow()
+        package_files_scrolled_window.set_propagate_natural_height(True)
+        package_files_scrolled_window.set_propagate_natural_width(True)
+        package_files_scrolled_window.set_policy(
+            Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
+        )
+
+        textbuffer_files = Gtk.TextBuffer()
+        end_iter = textbuffer_files.get_end_iter()
+        for line in files_list:
+            textbuffer_files.insert(end_iter, "  %s\n" % line, len("  %s\n" % line))
+
+        textview_files = Gtk.TextView(buffer=textbuffer_files)
+        # textview_files.set_vexpand(True)
+        # textview_files.set_hexpand(True)
+        textview_files.set_property("editable", False)
+        textview_files.set_property("monospace", True)
+
+        package_files_scrolled_window.add(textview_files)
+
+        vbox_package_files = Gtk.Box()
+        vbox_package_files.set_border_width(10)
+        vbox_package_files.pack_start(package_files_scrolled_window, True, True, 0)
+
+        stack.add_titled(vbox_package_files, "Files", "Files")
+
     def dl_zst_toggle(self, widget, data, url, filename):
         try:
             if widget.get_active() == True:
@@ -564,6 +590,12 @@ class PackageDialog(Gtk.Dialog):
                 if dl_status == "completed":
                     widget.set_sensitive(False)
                     self.lbl_dl_status.set_markup("<b>Download completed </b>")
+
+                elif dl_status == "ConnectionError":
+                    widget.set_sensitive(False)
+                    self.lbl_dl_status.set_markup(
+                        "<b>Download failed: ConnectionError </b>"
+                    )
                 else:
                     widget.set_active(False)
                     self.lbl_dl_status.set_markup("<b>Download failed </b>")

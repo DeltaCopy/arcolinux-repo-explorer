@@ -9,6 +9,7 @@ import os
 from os import makedirs
 import datetime
 from datetime import datetime, timedelta
+from ui.MessageDialog import MessageDialog
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
@@ -25,7 +26,7 @@ class Functions(object):
         "arcolinux_repo_xlarge",
     ]
     # 10m timeout
-    process_timeout = 600
+    process_timeout = 20
     sudo_username = os.getlogin()
     home = "/home/" + str(sudo_username)
     zst_download_path = "%s/repoxp/packages" % home
@@ -38,8 +39,8 @@ class Functions(object):
     # create console handler and set level to debug
     ch = logging.StreamHandler()
 
-    logger.setLevel(logging.DEBUG)
-    ch.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
+    ch.setLevel(logging.INFO)
 
     # create formatter
     formatter = logging.Formatter(
@@ -95,6 +96,19 @@ class Functions(object):
             r = requests_queue.get()
             requests_queue.task_done()
 
+            if type(r) is requests.exceptions.ConnectionError:
+                message_dialog = MessageDialog(
+                    "Error",
+                    "Download failed",
+                    "ConnectionError: Cannot connect to any configured pacman mirrors",
+                    "",
+                    "error",
+                    False,
+                )
+
+                message_dialog.show_all()
+                return "ConnectionError"
+
             if r.status_code == 200:
                 with open(filename, "wb") as zst_file:
                     for chunk in r.iter_content(chunk_size=1024):
@@ -109,17 +123,43 @@ class Functions(object):
                     return "failed"
 
             else:
+                message_dialog = MessageDialog(
+                    "Error",
+                    "Download failed",
+                    r.text,
+                    "",
+                    "error",
+                    True,
+                )
+
+                message_dialog.show_all()
                 return "failed"
 
         except Exception as e:
-            return "failed"
-
             self.logger.error(e)
 
-    def download_zst_file(self, url, requests_queue):
-        r = requests.get(url, headers=self.headers, allow_redirects=True, stream=True)
+            message_dialog = MessageDialog(
+                "Error",
+                "Download failed",
+                r.text,
+                "",
+                "error",
+                True,
+            )
 
-        requests_queue.put(r)
+            message_dialog.show_all()
+
+            return "failed"
+
+    def download_zst_file(self, url, requests_queue):
+        try:
+            r = requests.get(
+                url, headers=self.headers, allow_redirects=True, stream=True
+            )
+
+            requests_queue.put(r)
+        except Exception as e:
+            requests_queue.put(e)
 
     def sync_package_db(self):
         try:
@@ -134,33 +174,47 @@ class Functions(object):
             )
 
             if process_sync.returncode == 0:
-                return None
+                self.pacman_data_queue.put(None)
             else:
                 if process_sync.stdout:
                     out = str(process_sync.stdout.decode("utf-8"))
-                    self.logger.error(out)
+                    # self.logger.error(out)
 
-                    return out
+                    message_dialog = MessageDialog(
+                        "Error",
+                        "Pacman syncronization failed",
+                        out,
+                        "",
+                        "error",
+                        True,
+                    )
+
+                    message_dialog.show_all()
+                    self.pacman_data_queue.put("Pacman syncronization failed")
 
         except Exception as e:
-            logger.error("Exception in sync_package_db(): %s" % e)
+            self.logger.error("Exception in sync_package_db(): %s" % e)
 
     def get_packagelist(self, repo, pacman_data):
         installed_packages_list = self.get_all_arco_packages_state()
 
         packages = []
         self.installed_count = 0
+        self.update_count = 0
         installed_version = ""
         installed = False
+        update_required = False
 
         for package in pacman_data:
             installed = False
             installed_version = ""
+            update_required = False
             if package[0] == repo:
                 for installed_package in installed_packages_list:
                     if installed_package[0] == package[1]:
                         installed = True
                         installed_version = installed_package[1]
+                        update_required = installed_package[2]
 
                         break
                 if installed == True:
@@ -168,25 +222,52 @@ class Functions(object):
 
                 packages.append(
                     (
-                        package[1],
-                        package[2],
+                        package[1],  # package
+                        package[2],  # latest version
                         installed_version,
-                        package[3],
+                        package[3],  # build date
                         installed,
+                        update_required,
                     )
                 )
             # installed = False
 
         if len(packages) > 0:
-            treestore_packages = Gtk.TreeStore(str, str, str, str, bool)
-
-            # allow sorting by installed date
-
-            # treestore_packages.set_sort_func(2, self.compare_install_date, None)
-            # treestore_packages.set_sort_column_id(2, Gtk.SortType.DESCENDING)
-
+            # treestore_packages = Gtk.TreeStore(str, str, str, str, bool, bool)
+            treestore_packages = Gtk.TreeStore(str, str, str, str, bool, int, str, str)
             for item in sorted(packages):
-                treestore_packages.append(None, list(item))
+                # treestore_packages.append(None, list(item))
+
+                if item[5] == True:
+                    self.update_count += 1
+                    treestore_packages.append(
+                        None,
+                        [
+                            item[0],
+                            item[3],
+                            item[2],
+                            item[1],
+                            item[4],
+                            # Pango.Weight.BOLD,
+                            Pango.Weight.BOLD,
+                            "#F75D59",
+                            "#FEFCFF",
+                        ],
+                    )
+                else:
+                    treestore_packages.append(
+                        None,
+                        [
+                            item[0],
+                            item[3],
+                            item[2],
+                            item[1],
+                            item[4],
+                            Pango.Weight.NORMAL,
+                            None,
+                            None,
+                        ],
+                    )
 
             return treestore_packages
 
@@ -194,7 +275,7 @@ class Functions(object):
             return None
 
     # noqa: any locales other than en_GB.UTF-8 / en_US.UTF-8 are untested
-    def compare_install_date(self, model, row1, row2, user_data):
+    def compare_build_date(self, model, row1, row2, user_data):
         try:
             sort_column, _ = model.get_sort_column_id()
             str_value1 = model.get_value(row1, sort_column)
@@ -296,7 +377,9 @@ class Functions(object):
             self.logger.error(e)
 
     def get_all_arco_packages_state(self):
+        self.logger.debug("Getting package state data")
         installed_packages = []
+        update_required = False
 
         for repo in self.arco_repos:
             query_str = ["pacman", "-Sl", repo]
@@ -314,11 +397,22 @@ class Functions(object):
                 for line in out.decode("utf-8").splitlines():
                     package_info = line.split(" ")
 
+                    if len(package_info) == 5:
+                        if "[installed:" in package_info[3]:
+                            update_required = True
+                            installed_version = package_info[4].replace("]", "").strip()
+                            installed_packages.append(
+                                (package_info[1], installed_version, update_required)
+                            )
+
+                    else:
+                        update_required = False
+
                     if len(package_info) == 4:
                         if package_info[3] == "[installed]":
                             # installed_packages.append(package_info[1])
                             installed_packages.append(
-                                (package_info[1], package_info[2])
+                                (package_info[1], package_info[2], update_required)
                             )
 
             except Exception as e:
@@ -326,8 +420,23 @@ class Functions(object):
 
         return installed_packages
 
+    def get_package_files(self, package):
+        self.logger.info("Retrieving package files for %s" % package)
+        query_str = ["pacman", "-Fl", package]
+
+        try:
+            process_pkg_query = subprocess.Popen(
+                query_str, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+
+            out, err = process_pkg_query.communicate(timeout=self.process_timeout)
+            # return out.decode("utf-8").splitlines()
+            self.pacman_data_queue.put(out.decode("utf-8").splitlines())
+        except Exception as e:
+            self.logger.error(e)
+
     def get_package_sync_data(self):
-        self.logger.info("Get package sync data")
+        self.logger.info("Getting package syncronization data")
         query_str = ["pacman", "-Si"]
         try:
             process_pkg_query = subprocess.Popen(
