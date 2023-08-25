@@ -60,8 +60,6 @@ class PackageDialog(Gtk.Dialog):
 
         grid_package_details = Gtk.Grid()
 
-        vbox_package_details.pack_start(grid_package_details, False, False, 0)
-
         self.vbox.add(stack_switcher)
         self.vbox.add(stack)
         self.vbox.pack_start(vbox_padding, True, True, 0)
@@ -71,7 +69,8 @@ class PackageDialog(Gtk.Dialog):
         lbl_package_name_title.set_markup("<b>Package</b>")
 
         lbl_package_value = Gtk.Label(xalign=0, yalign=0)
-        lbl_package_value.set_text(package_name)
+        lbl_package_value.set_markup("<b>%s</b>" % package_name)
+
         lbl_package_value.set_selectable(True)
 
         lbl_padding_repo = Gtk.Label(xalign=0, yalign=0)
@@ -273,7 +272,7 @@ class PackageDialog(Gtk.Dialog):
             grid_package_details.attach(lbl_replaces_title, 0, 9, 1, 1)
 
             scrolled_window_replaces = Gtk.ScrolledWindow()
-            scrolled_window_replaces.set_propagate_natural_height(False)
+            scrolled_window_replaces.set_propagate_natural_height(True)
             scrolled_window_replaces.add(treeview_replaces)
 
             grid_package_details.attach_next_to(
@@ -496,7 +495,10 @@ class PackageDialog(Gtk.Dialog):
             grid_package_details.attach(lbl_depends_title, 0, 18, 1, 1)
 
             scrolled_window_depends = Gtk.ScrolledWindow()
-            scrolled_window_depends.set_propagate_natural_height(False)
+
+            scrolled_window_depends.set_policy(
+                Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
+            )
             scrolled_window_depends.add(treeview_depends)
 
             grid_package_details.attach_next_to(
@@ -539,7 +541,10 @@ class PackageDialog(Gtk.Dialog):
             grid_package_details.attach(lbl_conflicts_title, 0, 20, 1, 1)
 
             scrolled_window_conflicts = Gtk.ScrolledWindow()
-            scrolled_window_conflicts.set_propagate_natural_height(False)
+
+            scrolled_window_conflicts.set_policy(
+                Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
+            )
             scrolled_window_conflicts.add(treeview_conflicts)
 
             grid_package_details.attach_next_to(
@@ -554,12 +559,14 @@ class PackageDialog(Gtk.Dialog):
                 1,
             )
 
+        vbox_package_details.pack_start(grid_package_details, True, True, 0)
+
         stack.add_titled(vbox_package_details, "Information", "Information")
 
-        package_files_scrolled_window = Gtk.ScrolledWindow()
-        package_files_scrolled_window.set_propagate_natural_height(True)
-        package_files_scrolled_window.set_propagate_natural_width(True)
-        package_files_scrolled_window.set_policy(
+        scrolled_window_files = Gtk.ScrolledWindow()
+        scrolled_window_files.set_propagate_natural_height(True)
+        scrolled_window_files.set_propagate_natural_width(True)
+        scrolled_window_files.set_policy(
             Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
         )
 
@@ -574,11 +581,11 @@ class PackageDialog(Gtk.Dialog):
         textview_files.set_property("editable", False)
         textview_files.set_property("monospace", True)
 
-        package_files_scrolled_window.add(textview_files)
+        scrolled_window_files.add(textview_files)
 
         vbox_package_files = Gtk.Box()
         vbox_package_files.set_border_width(10)
-        vbox_package_files.pack_start(package_files_scrolled_window, True, True, 0)
+        vbox_package_files.pack_start(scrolled_window_files, True, True, 0)
 
         stack.add_titled(vbox_package_files, "Files", "Files")
 
