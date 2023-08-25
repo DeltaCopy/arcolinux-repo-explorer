@@ -22,7 +22,7 @@ The download package option lets you download the associated .zst package file t
 
 - Python 3.11
 - GTK3
-- Pacamn configured to use ArcoLinux repositories
+- Pacman configured to use ArcoLinux repositories
 
 # Usage
 
