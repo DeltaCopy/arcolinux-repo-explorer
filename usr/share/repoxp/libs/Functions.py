@@ -2,6 +2,7 @@ import logging
 import subprocess
 import gi
 import threading
+import shutil
 from threading import Thread
 from queue import Queue
 import requests
@@ -82,59 +83,65 @@ class Functions(object):
 
     def get_zst(self, url, filename):
         try:
-            requests_queue = Queue()
-            dl_zst_thread = Thread(
-                target=self.download_zst_file,
-                args=(
-                    url,
-                    requests_queue,
-                ),
-                daemon=True,
-            )
-
-            dl_zst_thread.start()
-
-            r = requests_queue.get()
-            requests_queue.task_done()
-
-            if type(r) is requests.exceptions.ConnectionError:
-                message_dialog = MessageDialog(
-                    "Error",
-                    "Download failed",
-                    "ConnectionError: Cannot connect to any configured pacman mirrors",
-                    "",
-                    "error",
-                    False,
+            # package is in the pacman cache use that one
+            if "file://" in url:
+                shutil.copyfile(url.replace("file://", ""), filename)
+                self.permissions(self.zst_download_path)
+                return "completed"
+            else:
+                requests_queue = Queue()
+                dl_zst_thread = Thread(
+                    target=self.download_zst_file,
+                    args=(
+                        url,
+                        requests_queue,
+                    ),
+                    daemon=True,
                 )
 
-                message_dialog.show_all()
-                return "ConnectionError"
+                dl_zst_thread.start()
 
-            if r.status_code == 200:
-                with open(filename, "wb") as zst_file:
-                    for chunk in r.iter_content(chunk_size=1024):
-                        if chunk:
-                            zst_file.write(chunk)
+                r = requests_queue.get()
+                requests_queue.task_done()
 
-                if os.path.exists(filename):
-                    self.permissions(self.zst_download_path)
-                    return "completed"
+                if type(r) is requests.exceptions.ConnectionError:
+                    message_dialog = MessageDialog(
+                        "Error",
+                        "Download failed",
+                        "ConnectionError: Cannot connect to any configured pacman mirrors",
+                        "",
+                        "error",
+                        False,
+                    )
+
+                    message_dialog.show_all()
+                    return "ConnectionError"
+
+                if r.status_code == 200:
+                    with open(filename, "wb") as zst_file:
+                        for chunk in r.iter_content(chunk_size=1024):
+                            if chunk:
+                                zst_file.write(chunk)
+
+                    if os.path.exists(filename):
+                        self.permissions(self.zst_download_path)
+                        return "completed"
+
+                    else:
+                        return "failed"
 
                 else:
+                    message_dialog = MessageDialog(
+                        "Error",
+                        "Download failed",
+                        r.text,
+                        "",
+                        "error",
+                        True,
+                    )
+
+                    message_dialog.show_all()
                     return "failed"
-
-            else:
-                message_dialog = MessageDialog(
-                    "Error",
-                    "Download failed",
-                    r.text,
-                    "",
-                    "error",
-                    True,
-                )
-
-                message_dialog.show_all()
-                return "failed"
 
         except Exception as e:
             self.logger.error(e)
