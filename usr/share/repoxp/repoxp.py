@@ -307,20 +307,6 @@ class Main(Gtk.Window):
 
                 self.treeview_packages.append_column(col_latest_version)
 
-                # renderer_col_installed = Gtk.CellRendererToggle()
-                # col_installed = Gtk.TreeViewColumn(
-                #     "Installed",
-                #     renderer_col_installed,
-                #     active=4,
-                # )
-                # col_installed.set_resizable(True)
-                # col_installed.set_reorderable(False)
-                # col_installed.set_sort_column_id(4)
-                #
-                # self.treeview_packages.append_column(col_installed)
-
-                # self.treeview_packages.expand_all()
-                # self.treeview_packages.columns_autosize()
                 self.treeview_packages.set_headers_clickable(True)
                 if self.treeview_packages is not None:
                     self.lbl_packages_repo.set_selectable(True)

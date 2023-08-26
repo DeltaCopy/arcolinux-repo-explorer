@@ -419,7 +419,7 @@ class PackageDialog(Gtk.Dialog):
         if last_index > 0:
             zst_filename = zst_download_link.split("/")[last_index]
             lbl_dl_zst_save_value.set_text(
-                "%s/%s" % (fn.zst_download_path, zst_filename)
+                "%s/%s" % (fn.zst_download_path_nousername, zst_filename)
             )
 
         self.lbl_dl_status = Gtk.Label(xalign=0, yalign=0)

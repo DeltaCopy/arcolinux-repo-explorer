@@ -29,6 +29,7 @@ class Functions(object):
     process_timeout = 20
     sudo_username = os.getlogin()
     home = "/home/" + str(sudo_username)
+    zst_download_path_nousername = "$HOME/repoxp/packages"
     zst_download_path = "%s/repoxp/packages" % home
     headers = {"Content-Type": "application/octet-stream"}
     installed_count = 0
