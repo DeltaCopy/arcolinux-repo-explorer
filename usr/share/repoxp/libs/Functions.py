@@ -62,6 +62,7 @@ class Functions(object):
         self.permissions("%s/repoxp/" % self.home)
         self.permissions(self.zst_download_path)
 
+    # set ownership of $HOME/repoxp, set it to the actual user running the app
     def permissions(self, dst):
         try:
             groups = subprocess.run(
@@ -81,6 +82,7 @@ class Functions(object):
         except Exception as e:
             self.logger.error(e)
 
+    # download the corresponding zst file
     def get_zst(self, url, filename):
         try:
             # package is in the pacman cache use that one
@@ -169,6 +171,7 @@ class Functions(object):
         except Exception as e:
             requests_queue.put(e)
 
+    # run pacman sync database - pacman -Syu
     def sync_package_db(self):
         try:
             sync_str = ["pacman", "-Sy"]
@@ -203,6 +206,7 @@ class Functions(object):
         except Exception as e:
             self.logger.error("Exception in sync_package_db(): %s" % e)
 
+    # retrieve package lists
     def get_packagelist(self, repo, pacman_data):
         installed_packages_list = self.get_all_arco_packages_state()
 
@@ -256,7 +260,6 @@ class Functions(object):
                             item[2],
                             item[1],
                             item[4],
-                            # Pango.Weight.BOLD,
                             Pango.Weight.BOLD,
                             "#F75D59",
                             "#FEFCFF",
@@ -324,6 +327,7 @@ class Functions(object):
         except Exception as e:
             self.logger.error("Exception in compare_install_date: %s" % e)
 
+    # use pacman to get the download link of a package
     def get_download_link(self, package_name):
         query_str = ["pacman", "-Sp", package_name]
 
@@ -342,6 +346,7 @@ class Functions(object):
         except Exception as e:
             self.logger.error(e)
 
+    # retrieve package version
     def get_package_version(self, package):
         query_str = ["pacman", "-Q", package]
 
@@ -363,8 +368,9 @@ class Functions(object):
         except Exception as e:
             self.logger.error(e)
 
+    # is the package installed
     def check_package_installed(self, package):
-        query_str = ["pacman", "-Q", package]
+        query_str = ["pacman", "-Qi", package]
 
         try:
             process_pkg_query = subprocess.Popen(
@@ -374,16 +380,58 @@ class Functions(object):
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
 
             if process_pkg_query.returncode == 0:
-                # line = out.decode("utf-8").splitlines()
-                # return line[0].split(" ")[1]
-                # # return line[0].split("")[1]
-
                 return True
             else:
                 return False
         except Exception as e:
             self.logger.error(e)
 
+    # entry completion: unused code
+    def update_entry_completion(self, treestore):
+        try:
+            # liststore = Gtk.ListStore(str)
+            treestore_completion = Gtk.TreeStore(str)
+            for row in treestore:
+                # liststore.append([data["name"]])
+                treestore_completion.append(None, [row[0]])
+
+            completion = Gtk.EntryCompletion()
+            completion.set_model(treestore_completion)
+
+            completion.set_text_column(0)
+            completion.set_popup_completion(True)
+
+            return completion
+        except Exception as e:
+            fn.logger.error("Exception in update_entry_completion(): %s" % e)
+
+    def search(self, search_term, treestore):
+        try:
+            results = []
+            treestore_packages = Gtk.TreeStore(str, str, str, str, bool, int, str, str)
+            for row in treestore:
+                if search_term in row[0]:
+                    results.append(row)
+
+                    treestore_packages.append(
+                        None,
+                        [
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3],
+                            False,
+                            Pango.Weight.NORMAL,
+                            None,
+                            None,
+                        ],
+                    )
+
+            return treestore_packages
+        except Exception as e:
+            self.logger.error(e)
+
+    # get all packages from specified repository
     def get_all_arco_packages_state(self):
         self.logger.debug("Getting package state data")
         installed_packages = []
@@ -428,6 +476,7 @@ class Functions(object):
 
         return installed_packages
 
+    # obtain all files from specific package
     def get_package_files(self, package):
         self.logger.info("Retrieving package files for %s" % package)
         query_str = ["pacman", "-Fl", package]
@@ -443,6 +492,7 @@ class Functions(object):
         except Exception as e:
             self.logger.error(e)
 
+    # retrieve package info
     def get_package_sync_data(self):
         self.logger.info("Getting package syncronization data")
         query_str = ["pacman", "-Si"]

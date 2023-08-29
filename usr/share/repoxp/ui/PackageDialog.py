@@ -9,6 +9,7 @@ fn = Functions()
 from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Pango
 
 
+# A message dialog window to show package details
 class PackageDialog(Gtk.Dialog):
     def __init__(self, package_name, pacman_data, files_list):
         Gtk.Dialog.__init__(self)
@@ -19,7 +20,7 @@ class PackageDialog(Gtk.Dialog):
                 break
 
         self.set_resizable(True)
-        self.set_size_request(500, 500)
+        self.set_size_request(700, 500)
         self.set_modal(True)
 
         headerbar = Gtk.HeaderBar()
@@ -47,34 +48,48 @@ class PackageDialog(Gtk.Dialog):
 
         vbox_padding = Gtk.Box(spacing=500)
 
-        hbox_close = Gtk.Box(spacing=6)
+        vbox_close = Gtk.Box(spacing=6)
 
-        hbox_close.set_border_width(10)
+        vbox_close.set_border_width(10)
 
-        hbox_close.pack_start(btn_close, True, True, 1)
+        vbox_close.pack_start(btn_close, True, True, 0)
 
         zst_download_link = fn.get_download_link(package_name)
-
-        vbox_package_details = Gtk.Box()
-        vbox_package_details.set_border_width(10)
 
         grid_package_details = Gtk.Grid()
 
         self.vbox.add(stack_switcher)
         self.vbox.add(stack)
         self.vbox.pack_start(vbox_padding, True, True, 0)
-        self.vbox.add(hbox_close)
+        self.vbox.add(vbox_close)
+
+        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+
+        listbox = Gtk.ListBox()
+        listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        box_outer.pack_start(listbox, True, True, 0)
+        box_outer.set_border_width(10)
+
+        # package name
 
         lbl_package_name_title = Gtk.Label(xalign=0, yalign=0)
         lbl_package_name_title.set_markup("<b>Package</b>")
 
-        lbl_package_value = Gtk.Label(xalign=0, yalign=0)
-        lbl_package_value.set_markup("<b>%s</b>" % package_name)
+        lbl_package_name_value = Gtk.Label(xalign=0, yalign=0)
+        lbl_package_name_value.set_markup("<b>%s</b>" % package_name)
+        lbl_package_name_value.set_selectable(True)
 
-        lbl_package_value.set_selectable(True)
+        # package name
+        row_package_title = Gtk.ListBoxRow()
+        vbox_package_title = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        row_package_title.add(vbox_package_title)
 
-        lbl_padding_repo = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_repo.set_text("  ")
+        vbox_package_title.pack_start(lbl_package_name_title, True, True, 0)
+        vbox_package_title.pack_start(lbl_package_name_value, True, True, 0)
+
+        listbox.add(row_package_title)
+
+        # repository
 
         lbl_repository_title = Gtk.Label(xalign=0, yalign=0)
         lbl_repository_title.set_markup("<b>Repository</b>")
@@ -83,26 +98,17 @@ class PackageDialog(Gtk.Dialog):
         lbl_repository_value.set_text(package[0])
         lbl_repository_value.set_selectable(True)
 
-        grid_package_details.attach(lbl_repository_title, 0, 1, 1, 1)
-
-        grid_package_details.attach_next_to(
-            lbl_padding_repo, lbl_repository_title, Gtk.PositionType.RIGHT, 1, 1
+        row_package_repository = Gtk.ListBoxRow()
+        vbox_package_repository_title = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=0
         )
+        vbox_package_repository_title.pack_start(lbl_repository_title, True, True, 0)
+        vbox_package_repository_title.pack_start(lbl_repository_value, True, True, 0)
+        row_package_repository.add(vbox_package_repository_title)
 
-        grid_package_details.attach_next_to(
-            lbl_repository_value, lbl_padding_repo, Gtk.PositionType.RIGHT, 1, 1
-        )
+        listbox.add(row_package_repository)
 
-        lbl_padding_package = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_package.set_text("  ")
-
-        grid_package_details.attach(lbl_package_name_title, 0, 2, 1, 1)
-        grid_package_details.attach_next_to(
-            lbl_padding_package, lbl_package_name_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-        grid_package_details.attach_next_to(
-            lbl_package_value, lbl_padding_package, Gtk.PositionType.RIGHT, 1, 1
-        )
+        # version
 
         lbl_version_title = Gtk.Label(xalign=0, yalign=0)
         lbl_version_title.set_markup("<b>Latest Version</b>")
@@ -111,18 +117,69 @@ class PackageDialog(Gtk.Dialog):
         lbl_version_value.set_text(package[2])
         lbl_version_value.set_selectable(True)
 
-        lbl_padding_version = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_version.set_text("  ")
+        row_package_version = Gtk.ListBoxRow()
+        vbox_package_version_title = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=0
+        )
+        vbox_package_version_title.pack_start(lbl_version_title, True, True, 0)
+        vbox_package_version_title.pack_start(lbl_version_value, True, True, 0)
+        row_package_version.add(vbox_package_version_title)
 
-        grid_package_details.attach(lbl_version_title, 0, 3, 1, 1)
+        listbox.add(row_package_version)
 
-        grid_package_details.attach_next_to(
-            lbl_padding_version, lbl_version_title, Gtk.PositionType.RIGHT, 1, 1
+        # package installed
+
+        lbl_installed_title = Gtk.Label(xalign=0, yalign=0)
+        lbl_installed_title.set_markup("<b>Installed</b>")
+
+        checkbox_installed = Gtk.CheckButton()
+        checkbox_installed.set_sensitive(False)
+
+        lbl_installed_version_title = Gtk.Label(xalign=0, yalign=0)
+        lbl_installed_version_title.set_markup("<b>Installed Version</b>")
+        lbl_installed_version_value = Gtk.Label(xalign=0, yalign=0)
+
+        row_package_installed = Gtk.ListBoxRow()
+        vbox_package_installed = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=0
         )
 
-        grid_package_details.attach_next_to(
-            lbl_version_value, lbl_padding_version, Gtk.PositionType.RIGHT, 1, 1
-        )
+        if fn.check_package_installed(package_name):
+            # installed size
+
+            lbl_installed_size_title = Gtk.Label(xalign=0, yalign=0)
+            lbl_installed_size_title.set_markup("<b>Installed Size</b>")
+
+            lbl_installed_size_value = Gtk.Label(xalign=0, yalign=0)
+            lbl_installed_size_value.set_text(package[5])
+            lbl_installed_size_value.set_selectable(True)
+
+            # lbl_installed_value.set_text("Yes")
+            checkbox_installed.set_active(True)
+            version = fn.get_package_version(package_name)
+
+            lbl_installed_version_value.set_text(version)
+
+            vbox_package_installed.pack_start(lbl_installed_title, True, True, 0)
+            vbox_package_installed.pack_start(checkbox_installed, True, True, 0)
+            vbox_package_installed.pack_start(
+                lbl_installed_version_title, True, True, 0
+            )
+            vbox_package_installed.pack_start(
+                lbl_installed_version_value, True, True, 0
+            )
+            vbox_package_installed.pack_start(lbl_installed_size_title, True, True, 0)
+            vbox_package_installed.pack_start(lbl_installed_size_value, True, True, 0)
+
+        else:
+            checkbox_installed.set_active(False)
+            vbox_package_installed.pack_start(lbl_installed_title, True, True, 0)
+            vbox_package_installed.pack_start(checkbox_installed, True, True, 0)
+
+        row_package_installed.add(vbox_package_installed)
+        listbox.add(row_package_installed)
+
+        # build date
 
         lbl_build_date_title = Gtk.Label(xalign=0, yalign=0)
         lbl_build_date_title.set_markup("<b>Build Date</b>")
@@ -131,74 +188,17 @@ class PackageDialog(Gtk.Dialog):
         lbl_build_date_value.set_text(package[3])
         lbl_build_date_value.set_selectable(True)
 
-        lbl_padding_build_date = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_build_date.set_text("  ")
-
-        grid_package_details.attach(lbl_build_date_title, 0, 4, 1, 1)
-
-        grid_package_details.attach_next_to(
-            lbl_padding_build_date, lbl_build_date_title, Gtk.PositionType.RIGHT, 1, 1
+        row_package_build_date = Gtk.ListBoxRow()
+        vbox_package_build_date = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=0
         )
+        vbox_package_build_date.pack_start(lbl_build_date_title, True, True, 0)
+        vbox_package_build_date.pack_start(lbl_build_date_value, True, True, 0)
+        row_package_build_date.add(vbox_package_build_date)
 
-        grid_package_details.attach_next_to(
-            lbl_build_date_value, lbl_padding_build_date, Gtk.PositionType.RIGHT, 1, 1
-        )
+        listbox.add(row_package_build_date)
 
-        lbl_installed_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_title.set_markup("<b>Installed</b>")
-
-        checkbox_installed = Gtk.CheckButton()
-        checkbox_installed.set_sensitive(False)
-        lbl_installed_version_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_version_title.set_markup("<b>Installed Version</b>")
-
-        lbl_installed_version_value = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_version_value.set_selectable(True)
-
-        if fn.check_package_installed(package_name):
-            # lbl_installed_value.set_text("Yes")
-            checkbox_installed.set_active(True)
-            version = fn.get_package_version(package_name)
-
-            lbl_installed_version_value.set_text(version)
-            lbl_padding_installed = Gtk.Label(xalign=0, yalign=0)
-            lbl_padding_installed.set_text("  ")
-
-            lbl_padding_installed_version = Gtk.Label(xalign=0, yalign=0)
-            lbl_padding_installed_version.set_text("  ")
-
-            grid_package_details.attach(lbl_installed_title, 0, 5, 1, 1)
-
-            grid_package_details.attach_next_to(
-                lbl_padding_installed, lbl_installed_title, Gtk.PositionType.RIGHT, 1, 1
-            )
-
-            grid_package_details.attach_next_to(
-                checkbox_installed, lbl_padding_installed, Gtk.PositionType.RIGHT, 1, 1
-            )
-
-            grid_package_details.attach(lbl_installed_version_title, 0, 6, 1, 1)
-
-            grid_package_details.attach_next_to(
-                lbl_padding_installed_version,
-                lbl_installed_version_title,
-                Gtk.PositionType.RIGHT,
-                1,
-                1,
-            )
-
-            grid_package_details.attach_next_to(
-                lbl_installed_version_value,
-                lbl_padding_installed_version,
-                Gtk.PositionType.RIGHT,
-                1,
-                1,
-            )
-        else:
-            # lbl_installed_value.set_text("No")
-            checkbox_installed.set_active(False)
-
-        #
+        # description
 
         lbl_description_title = Gtk.Label(xalign=0, yalign=0)
         lbl_description_title.set_markup("<b>Description</b>")
@@ -209,22 +209,17 @@ class PackageDialog(Gtk.Dialog):
         lbl_description_value.set_line_wrap(True)
         lbl_description_value.set_max_width_chars(50)
 
-        lbl_padding_description = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_description.set_text("  ")
-
-        grid_package_details.attach(lbl_description_title, 0, 7, 1, 1)
-
-        grid_package_details.attach_next_to(
-            lbl_padding_description, lbl_description_title, Gtk.PositionType.RIGHT, 1, 1
+        row_package_description = Gtk.ListBoxRow()
+        vbox_package_description = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL, spacing=0
         )
+        vbox_package_description.pack_start(lbl_description_title, True, True, 0)
+        vbox_package_description.pack_start(lbl_description_value, True, True, 0)
+        row_package_description.add(vbox_package_description)
 
-        grid_package_details.attach_next_to(
-            lbl_description_value,
-            lbl_padding_description,
-            Gtk.PositionType.RIGHT,
-            1,
-            1,
-        )
+        listbox.add(row_package_description)
+
+        # groups
 
         if len(package[14]) > 0:
             lbl_groups_title = Gtk.Label(xalign=0, yalign=0)
@@ -234,24 +229,17 @@ class PackageDialog(Gtk.Dialog):
             lbl_groups_value.set_text(" ".join(package[14]))
             lbl_groups_value.set_selectable(True)
 
-            lbl_padding_groups = Gtk.Label(xalign=0, yalign=0)
-            lbl_padding_groups.set_text("  ")
-
-            grid_package_details.attach(lbl_groups_title, 0, 8, 1, 1)
-
-            grid_package_details.attach_next_to(
-                lbl_padding_groups, lbl_groups_title, Gtk.PositionType.RIGHT, 1, 1
+            row_package_groups = Gtk.ListBoxRow()
+            vbox_package_groups = Gtk.Box(
+                orientation=Gtk.Orientation.VERTICAL, spacing=0
             )
+            vbox_package_groups.pack_start(lbl_groups_title, True, True, 0)
+            vbox_package_groups.pack_start(lbl_groups_value, True, True, 0)
+            row_package_groups.add(vbox_package_groups)
 
-            grid_package_details.attach_next_to(
-                lbl_groups_value, lbl_padding_groups, Gtk.PositionType.RIGHT, 1, 1
-            )
+            listbox.add(row_package_groups)
 
-        lbl_replaces_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_replaces_title.set_markup("<b>Replaces</b>")
-
-        lbl_padding_replaces = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_replaces.set_text("  ")
+        # Replaces
 
         if len(package[12]) > 0:
             lbl_replaces_title = Gtk.Label(xalign=0, yalign=0)
@@ -269,23 +257,23 @@ class PackageDialog(Gtk.Dialog):
 
             treeview_replaces.append_column(column)
 
-            grid_package_details.attach(lbl_replaces_title, 0, 9, 1, 1)
-
             scrolled_window_replaces = Gtk.ScrolledWindow()
-            scrolled_window_replaces.set_propagate_natural_height(True)
-            scrolled_window_replaces.add(treeview_replaces)
-
-            grid_package_details.attach_next_to(
-                lbl_padding_replaces, lbl_replaces_title, Gtk.PositionType.RIGHT, 1, 1
+            scrolled_window_replaces.set_policy(
+                Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
             )
+            # scrolled_window_replaces.add(treeview_replaces)
 
-            grid_package_details.attach_next_to(
-                scrolled_window_replaces,
-                lbl_padding_replaces,
-                Gtk.PositionType.RIGHT,
-                1,
-                1,
+            row_package_replaces = Gtk.ListBoxRow()
+            vbox_package_replaces = Gtk.Box(
+                orientation=Gtk.Orientation.VERTICAL, spacing=0
             )
+            vbox_package_replaces.pack_start(lbl_replaces_title, True, True, 0)
+            vbox_package_replaces.pack_start(treeview_replaces, True, True, 0)
+            row_package_replaces.add(vbox_package_replaces)
+
+            listbox.add(row_package_replaces)
+
+        # licenses
 
         lbl_licenses_title = Gtk.Label(xalign=0, yalign=0)
         lbl_licenses_title.set_markup("<b>Licenses</b>")
@@ -294,18 +282,15 @@ class PackageDialog(Gtk.Dialog):
         lbl_licenses_value.set_text(" ".join(package[13]))
         lbl_licenses_value.set_selectable(True)
 
-        lbl_padding_licenses = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_licenses.set_text("  ")
+        row_package_licenses = Gtk.ListBoxRow()
+        vbox_package_licenses = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_package_licenses.pack_start(lbl_licenses_title, True, True, 0)
+        vbox_package_licenses.pack_start(lbl_licenses_value, True, True, 0)
+        row_package_licenses.add(vbox_package_licenses)
 
-        grid_package_details.attach(lbl_licenses_title, 0, 10, 1, 1)
+        listbox.add(row_package_licenses)
 
-        grid_package_details.attach_next_to(
-            lbl_padding_licenses, lbl_licenses_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_licenses_value, lbl_padding_licenses, Gtk.PositionType.RIGHT, 1, 1
-        )
+        # download size
 
         lbl_dl_size_title = Gtk.Label(xalign=0, yalign=0)
         lbl_dl_size_title.set_markup("<b>Download Size</b>")
@@ -314,38 +299,15 @@ class PackageDialog(Gtk.Dialog):
         lbl_dl_size_value.set_text(package[4])
         lbl_dl_size_value.set_selectable(True)
 
-        lbl_padding_dl_size = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_dl_size.set_text("  ")
+        row_package_dl_size = Gtk.ListBoxRow()
+        vbox_package_dl_size = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_package_dl_size.pack_start(lbl_dl_size_title, True, True, 0)
+        vbox_package_dl_size.pack_start(lbl_dl_size_value, True, True, 0)
+        row_package_dl_size.add(vbox_package_dl_size)
 
-        grid_package_details.attach(lbl_dl_size_title, 0, 11, 1, 1)
+        listbox.add(row_package_dl_size)
 
-        grid_package_details.attach_next_to(
-            lbl_padding_dl_size, lbl_dl_size_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_dl_size_value, lbl_padding_dl_size, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        lbl_installed_size_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_size_title.set_markup("<b>Installed Size</b>")
-
-        lbl_installed_size_value = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_size_value.set_text(package[5])
-        lbl_installed_size_value.set_selectable(True)
-
-        lbl_padding6 = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding6.set_text("  ")
-
-        grid_package_details.attach(lbl_installed_size_title, 0, 12, 1, 1)
-
-        grid_package_details.attach_next_to(
-            lbl_padding6, lbl_installed_size_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_installed_size_value, lbl_padding6, Gtk.PositionType.RIGHT, 1, 1
-        )
+        # arch
 
         lbl_arch_title = Gtk.Label(xalign=0, yalign=0)
         lbl_arch_title.set_markup("<b>Arch</b>")
@@ -354,18 +316,15 @@ class PackageDialog(Gtk.Dialog):
         lbl_arch_value.set_text(package[7])
         lbl_arch_value.set_selectable(True)
 
-        lbl_padding_arch = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_arch.set_text("  ")
+        row_package_arch = Gtk.ListBoxRow()
+        vbox_package_arch = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_package_arch.pack_start(lbl_arch_title, True, True, 0)
+        vbox_package_arch.pack_start(lbl_arch_value, True, True, 0)
+        row_package_arch.add(vbox_package_arch)
 
-        grid_package_details.attach(lbl_arch_title, 0, 13, 1, 1)
+        listbox.add(row_package_arch)
 
-        grid_package_details.attach_next_to(
-            lbl_padding_arch, lbl_arch_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_arch_value, lbl_padding_arch, Gtk.PositionType.RIGHT, 1, 1
-        )
+        # url
 
         lbl_url_title = Gtk.Label(xalign=0, yalign=0)
         lbl_url_title.set_markup("<b>URL</b>")
@@ -374,18 +333,15 @@ class PackageDialog(Gtk.Dialog):
         lbl_url_value.set_text(package[8])
         lbl_url_value.set_selectable(True)
 
-        lbl_padding_url = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_url.set_text("  ")
+        row_package_url = Gtk.ListBoxRow()
+        vbox_package_url = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_package_url.pack_start(lbl_url_title, True, True, 0)
+        vbox_package_url.pack_start(lbl_url_value, True, True, 0)
+        row_package_url.add(vbox_package_url)
 
-        grid_package_details.attach(lbl_url_title, 0, 14, 1, 1)
+        listbox.add(row_package_url)
 
-        grid_package_details.attach_next_to(
-            lbl_padding_url, lbl_url_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_url_value, lbl_padding_url, Gtk.PositionType.RIGHT, 1, 1
-        )
+        # packager
 
         lbl_packager_title = Gtk.Label(xalign=0, yalign=0)
         lbl_packager_title.set_markup("<b>Packager</b>")
@@ -394,18 +350,13 @@ class PackageDialog(Gtk.Dialog):
         lbl_packager_value.set_text(package[11])
         lbl_packager_value.set_selectable(True)
 
-        lbl_padding_packager = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_packager.set_text("  ")
+        row_packager = Gtk.ListBoxRow()
+        vbox_packager = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_packager.pack_start(lbl_packager_title, True, True, 0)
+        vbox_packager.pack_start(lbl_packager_value, True, True, 0)
+        row_packager.add(vbox_packager)
 
-        grid_package_details.attach(lbl_packager_title, 0, 15, 1, 1)
-
-        grid_package_details.attach_next_to(
-            lbl_padding_packager, lbl_packager_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            lbl_packager_value, lbl_padding_packager, Gtk.PositionType.RIGHT, 1, 1
-        )
+        listbox.add(row_packager)
 
         last_index = 0
         last_index = len(zst_download_link.split("/")) - 1
@@ -440,36 +391,18 @@ class PackageDialog(Gtk.Dialog):
         lbl_dl_zst_title.set_markup("<b>Download Package</b>")
 
         lbl_padding_dl_zst = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_dl_zst.set_text("  ")
+        lbl_padding_dl_zst.set_text("   ")
 
-        lbl_padding_hint = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_hint.set_text("  ")
-
+        row_dl_zst = Gtk.ListBoxRow()
         vbox_switch = Gtk.Box()
+        vbox_switch.pack_start(lbl_dl_zst_title, False, True, 0)
         vbox_switch.pack_start(switch_dl_zst, False, True, 0)
-        vbox_switch.pack_start(lbl_padding_hint, False, True, 0)
+        vbox_switch.pack_start(lbl_padding_dl_zst, False, True, 0)
         vbox_switch.pack_start(self.lbl_dl_status, False, True, 0)
 
-        grid_package_details.attach(lbl_dl_zst_save_title, 0, 16, 1, 1)
-        grid_package_details.attach_next_to(
-            lbl_padding_dl_zst, lbl_dl_zst_save_title, Gtk.PositionType.RIGHT, 1, 1
-        )
+        row_dl_zst.add(vbox_switch)
 
-        grid_package_details.attach_next_to(
-            lbl_dl_zst_save_value, lbl_padding_dl_zst, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        lbl_padding_switch = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_switch.set_text("  ")
-
-        grid_package_details.attach(lbl_dl_zst_title, 0, 17, 1, 1)
-        grid_package_details.attach_next_to(
-            lbl_padding_switch, lbl_dl_zst_title, Gtk.PositionType.RIGHT, 1, 1
-        )
-
-        grid_package_details.attach_next_to(
-            vbox_switch, lbl_padding_switch, Gtk.PositionType.RIGHT, 1, 1
-        )
+        listbox.add(row_dl_zst)
 
         depends_on = package[9]
 
@@ -492,26 +425,20 @@ class PackageDialog(Gtk.Dialog):
             lbl_padding_depends = Gtk.Label(xalign=0, yalign=0)
             lbl_padding_depends.set_text("  ")
 
-            grid_package_details.attach(lbl_depends_title, 0, 18, 1, 1)
-
             scrolled_window_depends = Gtk.ScrolledWindow()
 
             scrolled_window_depends.set_policy(
                 Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
             )
-            scrolled_window_depends.add(treeview_depends)
+            # scrolled_window_depends.add(treeview_depends)
 
-            grid_package_details.attach_next_to(
-                lbl_padding_depends, lbl_depends_title, Gtk.PositionType.RIGHT, 1, 1
-            )
+            row_depends = Gtk.ListBoxRow()
+            vbox_depends = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+            vbox_depends.pack_start(lbl_depends_title, True, True, 0)
+            vbox_depends.pack_start(treeview_depends, True, True, 0)
+            row_depends.add(vbox_depends)
 
-            grid_package_details.attach_next_to(
-                scrolled_window_depends,
-                lbl_padding_depends,
-                Gtk.PositionType.RIGHT,
-                1,
-                1,
-            )
+            listbox.add(row_depends)
 
         conflicts_with = package[10]
 
@@ -530,42 +457,40 @@ class PackageDialog(Gtk.Dialog):
 
             treeview_conflicts.append_column(column)
 
-            lbl_padding_conflicts = Gtk.Label(xalign=0, yalign=0)
-            lbl_padding_conflicts.set_text("  ")
-
-            lbl_padding_newline1 = Gtk.Label(xalign=0, yalign=0)
-            lbl_padding_newline1.set_text("")
-
-            grid_package_details.attach(lbl_padding_newline1, 0, 19, 1, 1)
-
-            grid_package_details.attach(lbl_conflicts_title, 0, 20, 1, 1)
-
             scrolled_window_conflicts = Gtk.ScrolledWindow()
 
             scrolled_window_conflicts.set_policy(
                 Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
             )
-            scrolled_window_conflicts.add(treeview_conflicts)
+            # scrolled_window_conflicts.add(treeview_conflicts)
 
-            grid_package_details.attach_next_to(
-                lbl_padding_conflicts, lbl_conflicts_title, Gtk.PositionType.RIGHT, 1, 1
-            )
+            row_conflicts = Gtk.ListBoxRow()
+            vbox_conflicts = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+            vbox_conflicts.pack_start(lbl_conflicts_title, True, True, 0)
+            vbox_conflicts.pack_start(treeview_conflicts, True, True, 0)
+            row_conflicts.add(vbox_conflicts)
 
-            grid_package_details.attach_next_to(
-                scrolled_window_conflicts,
-                lbl_padding_conflicts,
-                Gtk.PositionType.RIGHT,
-                1,
-                1,
-            )
+            listbox.add(row_conflicts)
 
-        vbox_package_details.pack_start(grid_package_details, True, True, 0)
+        scrolled_window_package_info = Gtk.ScrolledWindow()
+        scrolled_window_package_info.set_size_request(0, 400)
+        scrolled_window_package_info.set_propagate_natural_height(False)
 
-        stack.add_titled(vbox_package_details, "Information", "Information")
+        scrolled_window_package_info.set_policy(
+            Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
+        )
+
+        scrolled_window_package_info.add(box_outer)
+
+        vbox_package_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+
+        vbox_package_info.pack_start(scrolled_window_package_info, True, True, 1)
+
+        stack.add_titled(vbox_package_info, "Information", "Information")
 
         scrolled_window_files = Gtk.ScrolledWindow()
         scrolled_window_files.set_propagate_natural_height(True)
-        scrolled_window_files.set_propagate_natural_width(True)
+        # scrolled_window_files.set_propagate_natural_width(True)
         scrolled_window_files.set_policy(
             Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
         )
@@ -576,8 +501,7 @@ class PackageDialog(Gtk.Dialog):
             textbuffer_files.insert(end_iter, "  %s\n" % line, len("  %s\n" % line))
 
         textview_files = Gtk.TextView(buffer=textbuffer_files)
-        # textview_files.set_vexpand(True)
-        # textview_files.set_hexpand(True)
+
         textview_files.set_property("editable", False)
         textview_files.set_property("monospace", True)
 

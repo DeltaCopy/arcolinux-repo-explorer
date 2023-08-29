@@ -32,15 +32,21 @@ class Main(Gtk.Window):
 
             self.set_default_size(800, 500)
 
+            # ctrl+f give focus to search entry
+            self.connect("key-press-event", self.on_keypress_event)
+
             headerbar = Gtk.HeaderBar()
             headerbar.set_title("%s" % app_name)
             headerbar.set_show_close_button(True)
 
             self.set_titlebar(headerbar)
             self.package_name = None
+            self.search_activated = False
 
             self.lbl_pacman_sync_db = Gtk.Label(xalign=0, yalign=0)
             self.lbl_pacman_sync_db.set_selectable(True)
+
+            # pacman syncronization
 
             self.sync_data()
 
@@ -53,11 +59,24 @@ class Main(Gtk.Window):
                     "Pacman DB Synchronized at <b>%s</b>"
                     % datetime.datetime.now().strftime("%H:%M:%S")
                 )
-
+            fn.logger.info("Loading GUI components")
             self.setup_gui()
+            fn.logger.info("Application started")
 
         except Exception as e:
             fn.logger.error("Exception in Main() : %s" % e)
+
+    # =====================================================
+    #               WINDOW KEY EVENT CTRL + F
+    # =====================================================
+
+    # sets focus on the search entry
+    def on_keypress_event(self, widget, event):
+        shortcut = Gtk.accelerator_get_label(event.keyval, event.state)
+
+        if shortcut in ("Ctrl+F", "Ctrl+Mod2+F"):
+            # set focus on text entry, select all text if any
+            self.search_entry.grab_focus()
 
     def sync_data(self):
         fn.logger.info("Synchronizing pacman package database")
@@ -83,10 +102,13 @@ class Main(Gtk.Window):
         except Exception as e:
             fn.logger.error(e)
 
+    # setup gui components on the main window
     def setup_gui(self):
         # fn.get_package_sync_data
         self.treeview_loaded = False
         self.repo_selected = "arcolinux_repo"
+
+        # radio buttons
 
         rb_arco_repo = Gtk.RadioButton.new_with_label_from_widget(
             None, "arcolinux_repo"
@@ -128,9 +150,18 @@ class Main(Gtk.Window):
 
         rb_arco_testing_repo.set_name("rb_arco_testing_repo")
 
+        # search text
+
+        self.search_entry = Gtk.SearchEntry()
+        self.search_entry.set_placeholder_text("Search...")
+
+        self.search_entry.connect("activate", self.on_search_activated)
+        self.search_entry.connect("icon-release", self.on_search_cleared)
+
         hbox_repo = Gtk.Box(spacing=6)
         hbox_repo.set_border_width(10)
 
+        # pack the radio buttons
         hbox_repo.pack_start(rb_arco_repo, False, False, 0)
         hbox_repo.pack_start(rb_arco_3rdparty_repo, False, False, 0)
         hbox_repo.pack_start(rb_arco_xl_repo, False, False, 0)
@@ -139,11 +170,40 @@ class Main(Gtk.Window):
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
         self.vbox.pack_start(hbox_repo, False, True, 0)
+        self.vbox.pack_start(self.search_entry, False, False, 0)
 
+        # add vbox to the main window
         self.add(self.vbox)
 
         self.get_packages("arcolinux_repo", self.pacman_data)
 
+    def on_search_activated(self, searchentry):
+        search_term = searchentry.get_text()
+
+        if len(search_term) == 0:
+            self.search_activated = False
+            self.get_packages(self.repo_selected, self.pacman_data)
+        else:
+            # if the string is completely whitespace ignore searching
+            if not search_term.isspace():
+                try:
+                    if len(search_term.rstrip().lstrip()) > 0:
+                        self.treestore_packages = fn.search(
+                            search_term, self.treestore_packages
+                        )
+
+                        if len(self.treestore_packages) > 0:
+                            self.search_activated = True
+                            self.get_packages(self.repo_selected, self.pacman_data)
+
+                except Exception as e:
+                    fn.logger.error(e)
+
+    def on_search_cleared(self, searchentry, icon_pos, event):
+        self.search_activated = False
+        self.get_packages(self.repo_selected, self.pacman_data)
+
+    # attached to radio buttons toggled signal
     def on_rb_toggled(self, rb, pacman_data, repo_name):
         if rb.get_active():
             try:
@@ -153,6 +213,8 @@ class Main(Gtk.Window):
             except Exception as e:
                 fn.logger.error(e)
 
+    # retrieve packages from toggled repository
+    # populate treeview with package contents
     def get_packages(self, repo_name, pacman_data):
         if repo_name:
             if self.treeview_loaded is True:
@@ -180,7 +242,8 @@ class Main(Gtk.Window):
                 if self.lbl_no_packages is not None:
                     self.lbl_no_packages.destroy()
 
-            treestore_packages = fn.get_packagelist(repo_name, pacman_data)
+            if self.search_activated == False:
+                self.treestore_packages = fn.get_packagelist(repo_name, pacman_data)
 
             self.lbl_packages_count = Gtk.Label(xalign=0, yalign=0)
             self.lbl_packages_installed_count = Gtk.Label(xalign=0, yalign=0)
@@ -227,10 +290,12 @@ class Main(Gtk.Window):
             self.lbl_no_packages = Gtk.Label(xalign=0, yalign=0)
             self.lbl_no_packages.set_markup("<b>No packages found</b>")
 
-            if treestore_packages is not None:
+            # treeview is sorted on build date, latest is on top
+
+            if self.treestore_packages is not None:
                 self.treeview_packages = Gtk.TreeView()
 
-                self.treeview_packages.set_model(treestore_packages)
+                self.treeview_packages.set_model(self.treestore_packages)
 
                 renderer_col_name = Gtk.CellRendererText()
                 col_name = Gtk.TreeViewColumn(
@@ -263,13 +328,13 @@ class Main(Gtk.Window):
 
                 self.treeview_packages.append_column(col_build_date)
 
-                treestore_packages.set_sort_column_id(1, Gtk.SortType.DESCENDING)
+                self.treestore_packages.set_sort_column_id(1, Gtk.SortType.DESCENDING)
                 col_build_date.set_sort_order(Gtk.SortType.DESCENDING)
                 col_build_date.set_sort_indicator(True)
                 col_build_date.set_clickable(True)
                 col_build_date.set_sort_column_id(1)
 
-                treestore_packages.set_sort_func(1, fn.compare_build_date, None)
+                self.treestore_packages.set_sort_func(1, fn.compare_build_date, None)
 
                 renderer_col_installed_version = Gtk.CellRendererText()
                 col_installed_version = Gtk.TreeViewColumn(
@@ -285,7 +350,6 @@ class Main(Gtk.Window):
                 col_installed_version.set_reorderable(False)
                 col_installed_version.set_sort_indicator(True)
                 col_installed_version.set_sort_column_id(2)
-                # col_installed_version.set_sort_order(Gtk.SortType.DESCENDING)
 
                 self.treeview_packages.append_column(col_installed_version)
 
@@ -334,11 +398,8 @@ class Main(Gtk.Window):
                         "row-activated", self.on_row_activated
                     )
 
-                    # col_installed_date = self.treeview_packages.get_column(2)
-                    # col_installed_date.set_sort_column_id(2)
-
                     self.scrolled_window = Gtk.ScrolledWindow()
-                    # scrolled_window.set_vexpand(True)
+
                     self.scrolled_window.set_propagate_natural_height(True)
                     self.scrolled_window.set_propagate_natural_width(True)
                     self.scrolled_window.set_policy(
@@ -363,7 +424,15 @@ class Main(Gtk.Window):
                     self.show_all()
 
                     selection = self.treeview_packages.get_selection()
+                    # restricts selection to single
                     selection.set_mode(Gtk.SelectionMode.SINGLE)
+
+                    # completion = fn.update_entry_completion(self.treestore_packages)
+
+                    # completion.connect(
+                    #     "match-selected", self.on_match_selected, self.textentry_search
+                    # )
+                    # self.textentry_search.set_completion(completion)
 
                     self.treeview_loaded = True
             else:
@@ -376,6 +445,7 @@ class Main(Gtk.Window):
 
                 self.treeview_loaded = True
 
+    # double click, select treeview row + enter
     def on_row_activated(self, treeview, path, col):
         model = treeview.get_model()
         tree_iter = model.get_iter(path)
@@ -400,11 +470,15 @@ class Main(Gtk.Window):
             "---------------------------------------------------------------------------"
         )
         print("Thanks for using ArcoRepoXP")
+
+        # un-comment below if this application ever becomes an official Arco product
+
         # print("Report issues to make it even better")
         # print("---------------------------------------------------------------------------")
         # print("You can report issues on https://discord.gg/stBhS4taje")
         # print("---------------------------------------------------------------------------")
 
+    # refresh button, run pacman sync and reload treeview
     def on_refresh(self, widget):
         self.sync_data()
 
@@ -460,7 +534,7 @@ if __name__ == "__main__":
                 flags=0,
                 message_type=Gtk.MessageType.INFO,
                 buttons=Gtk.ButtonsType.YES_NO,
-                text="Sofirem Lock File Found",
+                text="ArcoRepoXP Lock File Found",
             )
             md.format_secondary_markup(
                 "A ArcoRepoXP lock file has been found. This indicates there is already an instance of <b>ArcoRepoXP</b> running.\n\
