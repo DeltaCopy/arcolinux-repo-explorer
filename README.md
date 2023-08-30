@@ -32,7 +32,7 @@ The download package option lets you download the associated .zst package file t
 
 # Requirements
 
-- Python 3.11
+- Python 3.11 or above
 - GTK3
 - Pacman configured to use ArcoLinux repositories
 
