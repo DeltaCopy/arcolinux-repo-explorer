@@ -443,6 +443,8 @@ class Main(Gtk.Window):
 
                 self.show_all()
 
+                self.search_entry.hide()
+
                 self.treeview_loaded = True
 
     # double click, select treeview row + enter
