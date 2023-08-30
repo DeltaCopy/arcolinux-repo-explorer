@@ -15,6 +15,7 @@ The following repositories are explorable:
 
 - Any installed packages with pending updates will be highlighted
 - Double clicking a package name displays more details
+- Clicking Refresh runs a ```pacman -Sy``` to synchronize the pacman repositories and bring in the latest package details
 
 ###### Package Details Window
 
