@@ -25,7 +25,8 @@ The following repositories are explorable:
 
 ![Download Package](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/e64964b1-4f9a-4946-b59f-ed4dba157f92)
 
-The download package option lets you download the associated .zst package file to disk for offline installations. This is stored inside $HOME/repoxp/packages.
+The download package option lets you download the associated .zst package file to disk for offline installations. 
+This is stored inside $HOME/repoxp/packages.
 
 ###### Files view
 ![Files Stack](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/a088600d-576e-4137-b202-c50a44985966)
