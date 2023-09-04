@@ -138,7 +138,7 @@ class PackageDialog(Gtk.Dialog):
         lbl_installed_version_title = Gtk.Label(xalign=0, yalign=0)
         lbl_installed_version_title.set_markup("<b>Installed Version</b>")
         lbl_installed_version_value = Gtk.Label(xalign=0, yalign=0)
-        lbl_installed_version_value.set_selectable(True)        
+        lbl_installed_version_value.set_selectable(True)
 
         row_package_installed = Gtk.ListBoxRow()
         vbox_package_installed = Gtk.Box(
@@ -391,14 +391,18 @@ class PackageDialog(Gtk.Dialog):
         lbl_dl_zst_title = Gtk.Label(xalign=0, yalign=0)
         lbl_dl_zst_title.set_markup("<b>Download Package</b>")
 
-        lbl_padding_dl_zst = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding_dl_zst.set_text("   ")
+        lbl_padding_dl_zst1 = Gtk.Label(xalign=0, yalign=0)
+        lbl_padding_dl_zst1.set_text("   ")
+
+        lbl_padding_dl_zst2 = Gtk.Label(xalign=0, yalign=0)
+        lbl_padding_dl_zst2.set_text("   ")
 
         row_dl_zst = Gtk.ListBoxRow()
         vbox_switch = Gtk.Box()
         vbox_switch.pack_start(lbl_dl_zst_title, False, True, 0)
+        vbox_switch.pack_start(lbl_padding_dl_zst1, False, True, 0)
         vbox_switch.pack_start(switch_dl_zst, False, True, 0)
-        vbox_switch.pack_start(lbl_padding_dl_zst, False, True, 0)
+        vbox_switch.pack_start(lbl_padding_dl_zst2, False, True, 0)
         vbox_switch.pack_start(self.lbl_dl_status, False, True, 0)
 
         row_dl_zst.add(vbox_switch)

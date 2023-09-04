@@ -171,6 +171,41 @@ class Functions(object):
         except Exception as e:
             requests_queue.put(e)
 
+    # run pacman sync files database - pacman -Fy
+    def sync_file_db(self):
+        try:
+            sync_str = ["pacman", "-Fy"]
+
+            process_sync = subprocess.run(
+                sync_str,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=self.process_timeout,
+            )
+
+            if process_sync.returncode == 0:
+                self.pacman_data_queue.put(None)
+            else:
+                if process_sync.stdout:
+                    out = str(process_sync.stdout.decode("utf-8"))
+                    # self.logger.error(out)
+
+                    message_dialog = MessageDialog(
+                        "Error",
+                        "Pacman file syncronization failed",
+                        out,
+                        "",
+                        "error",
+                        True,
+                    )
+
+                    message_dialog.show_all()
+                    self.pacman_data_queue.put("Pacman file syncronization failed")
+
+        except Exception as e:
+            self.logger.error("Exception in sync_package_db(): %s" % e)
+
     # run pacman sync database - pacman -Syu
     def sync_package_db(self):
         try:
@@ -507,8 +542,9 @@ class Functions(object):
             )
 
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
-            # return out.decode("utf-8").splitlines()
-            self.pacman_data_queue.put(out.decode("utf-8").splitlines())
+
+            return out.decode("utf-8").splitlines()
+            # self.pacman_data_queue.put(out.decode("utf-8").splitlines())
         except Exception as e:
             self.logger.error(e)
 

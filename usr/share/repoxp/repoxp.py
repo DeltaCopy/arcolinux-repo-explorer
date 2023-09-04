@@ -102,6 +102,16 @@ class Main(Gtk.Window):
         except Exception as e:
             fn.logger.error(e)
 
+        fn.logger.info("Synchronizing pacman file database")
+        try:
+            thread_pacman_sync_file = Thread(
+                target=fn.sync_file_db,
+                daemon=True,
+            )
+            thread_pacman_sync_file.start()
+        except Exception as e:
+            fn.logger.error(e)
+
     # setup gui components on the main window
     def setup_gui(self):
         # fn.get_package_sync_data
@@ -479,12 +489,11 @@ class Main(Gtk.Window):
         if tree_iter:
             package_name = model.get_value(tree_iter, 0)
             if package_name:
-                thread_files_list = Thread(
-                    target=fn.get_package_files, daemon=True, args=(package_name,)
-                )
-                thread_files_list.start()
-                files_list = fn.pacman_data_queue.get()
-                fn.pacman_data_queue.task_done()
+                files_list = fn.get_package_files(package_name)
+
+                if len(files_list) == 0:
+                    files_list = "No files found"
+
                 package_dialog = PackageDialog(
                     package_name, self.pacman_data, files_list
                 )
