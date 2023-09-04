@@ -19,7 +19,7 @@ The following repositories are explorable:
 
 ###### Package Details Window
 
-![Package Details Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/93a60ada-c033-47b4-b952-4702c66a27f5)
+![Package Details Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/adc6cd4b-5709-44a6-9436-8b71ae6ae87a)
 
 ###### Download option
 

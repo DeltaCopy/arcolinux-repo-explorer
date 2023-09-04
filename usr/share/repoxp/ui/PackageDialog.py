@@ -138,6 +138,7 @@ class PackageDialog(Gtk.Dialog):
         lbl_installed_version_title = Gtk.Label(xalign=0, yalign=0)
         lbl_installed_version_title.set_markup("<b>Installed Version</b>")
         lbl_installed_version_value = Gtk.Label(xalign=0, yalign=0)
+        lbl_installed_version_value.set_selectable(True)        
 
         row_package_installed = Gtk.ListBoxRow()
         vbox_package_installed = Gtk.Box(

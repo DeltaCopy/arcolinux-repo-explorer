@@ -188,6 +188,9 @@ class Main(Gtk.Window):
             if not search_term.isspace():
                 try:
                     if len(search_term.rstrip().lstrip()) > 0:
+                        self.treestore_packages = fn.get_packagelist(
+                            self.repo_selected, self.pacman_data
+                        )
                         self.treestore_packages = fn.search(
                             search_term, self.treestore_packages
                         )
@@ -195,6 +198,17 @@ class Main(Gtk.Window):
                         if len(self.treestore_packages) > 0:
                             self.search_activated = True
                             self.get_packages(self.repo_selected, self.pacman_data)
+                        else:
+                            message_dialog = MessageDialog(
+                                "Search Results",
+                                "No results found",
+                                "0 Packages found with term '%s'" % search_term,
+                                "",
+                                "info",
+                                False,
+                            )
+
+                            message_dialog.show_all()
 
                 except Exception as e:
                     fn.logger.error(e)
@@ -242,6 +256,9 @@ class Main(Gtk.Window):
                 if self.lbl_no_packages is not None:
                     self.lbl_no_packages.destroy()
 
+                if self.lbl_updates_today is not None:
+                    self.lbl_updates_today.destroy()
+
             if self.search_activated == False:
                 self.treestore_packages = fn.get_packagelist(repo_name, pacman_data)
 
@@ -249,6 +266,7 @@ class Main(Gtk.Window):
             self.lbl_packages_installed_count = Gtk.Label(xalign=0, yalign=0)
             self.lbl_packages_repo = Gtk.Label(xalign=0, yalign=0)
             self.lbl_package_updates = Gtk.Label(xalign=0, yalign=0)
+            self.lbl_updates_today = Gtk.Label(xalign=0, yalign=0)
 
             btn_quit = Gtk.Button(label="Quit")
             btn_quit.set_size_request(100, 30)
@@ -384,6 +402,11 @@ class Main(Gtk.Window):
                         % str(len(self.treeview_packages.get_model()))
                     )
 
+                    self.lbl_updates_today.set_selectable(True)
+                    self.lbl_updates_today.set_markup(
+                        "Packages Updated Today = <b>%s</b>" % (fn.updates_today)
+                    )
+
                     self.lbl_packages_installed_count.set_selectable(True)
                     self.lbl_packages_installed_count.set_markup(
                         "Installed Packages = <b>%s</b>" % str(fn.installed_count)
@@ -391,7 +414,7 @@ class Main(Gtk.Window):
 
                     self.lbl_package_updates.set_selectable(True)
                     self.lbl_package_updates.set_markup(
-                        "Updates = <b>%s</b>" % str(fn.update_count)
+                        "Packages Built Today = <b>%s</b>" % str(fn.update_count)
                     )
 
                     self.treeview_packages.connect(
@@ -416,6 +439,7 @@ class Main(Gtk.Window):
                         self.lbl_packages_installed_count, False, False, 0
                     )
                     self.vbox.pack_start(self.lbl_package_updates, False, False, 0)
+                    self.vbox.pack_start(self.lbl_updates_today, False, False, 0)
 
                     self.vbox.pack_start(self.lbl_pacman_sync_db, False, False, 0)
 
