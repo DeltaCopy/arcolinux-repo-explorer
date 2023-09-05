@@ -44,6 +44,5 @@ This application requires sudo access to run Pacman commands successfully.
 
 ```bash
 git clone https://github.com/DeltaCopy/arcolinux-repo-explorer.git
-cd arcolinux-repo-explorer/usr/share/repoxp
-sudo python repoxp.py
+makepkg -si
 ```
