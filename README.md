@@ -34,6 +34,7 @@ This is stored inside $HOME/repoxp/packages
 
 # Requirements
 
+- OS: Arch Linux only
 - Python 3.11 or above
 - GTK3
 - Pacman configured to use ArcoLinux repositories
