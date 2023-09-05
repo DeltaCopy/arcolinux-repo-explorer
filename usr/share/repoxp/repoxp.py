@@ -19,6 +19,8 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
 base_dir = os.path.dirname(os.path.realpath(__file__))
 app_name = "ArcoLinux RepoXPlorer"
 app_desc = "Explore ArcoLinux Package Repos"
+print("[INFO] : pkgver = pkgversion")
+print("[INFO] : pkgrel = pkgrelease")
 
 
 class Main(Gtk.Window):

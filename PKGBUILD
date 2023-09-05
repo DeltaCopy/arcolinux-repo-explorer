@@ -1,22 +1,25 @@
-# Maintainer: John Patrick <john.patrick@gmail.com>
-pkgname=arcolinux-repoxp
-_pkgname=arcolinux-repoxp
-pkgver=23.09.01
-pkgrel=1
-pkgdesc="ArcoLinux repository explorer"
+# Maintainer: DeltaCopy (fennec)
+pkgname=arcolinux-repo-explorer
+_pkgname=arcolinux-repo-explorer
+_destname1="/usr"
+_licensedir="/usr/share/repoxp/licenses/"
+pkgver=23.09
+pkgrel=05
+pkgdesc="ArcoLinux Repository Explorer"
 arch=('x86_64')
-url="https://github.com/DeltaCopy/arcolinux-repo-explorer"
+url="https://github.com/DeltaCopy/${_pkgname}"
 license=('GPL3')
 depends=('python-gobject' 'polkit-gnome')
 makedepends=('git')
 options=(!strip !emptydirs)
-source=(git+${url})
+source=("${_pkgname}::git+${url}")
 sha256sums=('SKIP')
-pkgver() {
-    cd "${srcdir}/repoxp"
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-}
+install='readme.install'
 package() {
-	install -m755 -d "${pkgdir}/usr/"
-	cp -r ${srcdir}/${_pkgname}/usr ${pkgdir}
+	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+	#sed -i -e s/pkgversion/$pkgver/ $srcdir/${_pkgname}/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py
+	#sed -i -e s/pkgrelease/$pkgrel/ $srcdir/${_pkgname}/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py
+
+	cp -r ${srcdir}/${_pkgname}/${_destname1} ${pkgdir}
 }
