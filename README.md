@@ -37,12 +37,20 @@ This is stored inside $HOME/repoxp/packages
 - Python 3.11 or above
 - GTK3
 - Pacman configured to use ArcoLinux repositories
+- Polkit running and configured correctly on system
 
 This application requires sudo access to run Pacman commands successfully.
 
-# Usage
+# Installation
 
+Download prebuilt .zst file.
 ```bash
-git clone https://github.com/DeltaCopy/arcolinux-repo-explorer.git
-makepkg -si
+sudo pacman -U arcolinux-repo-explorer-23.09-05-x86_64.pkg.tar.zst
+```
+This will install the package into /usr/share/repoxp
+
+# Running
+Open a terminal and type:
+```bash
+repoxp
 ```
