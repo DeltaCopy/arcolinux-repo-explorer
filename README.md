@@ -41,7 +41,16 @@ This is stored inside $HOME/repoxp/packages
 
 This application requires sudo access to run Pacman commands successfully.
 
-# Installation
+# Building the package
+
+```bash
+wget https://raw.githubusercontent.com/DeltaCopy/arcolinux-repo-explorer/main/PKGBUILD
+makepkg -si
+```
+
+If those steps fail use the offline method described below.
+
+# Offline installation method
 
 ```bash
 wget https://github.com/DeltaCopy/arcolinux-repo-explorer/releases/download/pre-release-23.09-02/arcolinux-repo-explorer-23.09-02-x86_64.pkg.tar.zst
