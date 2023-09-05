@@ -43,9 +43,9 @@ This application requires sudo access to run Pacman commands successfully.
 
 # Installation
 
-Download prebuilt .zst file.
 ```bash
-sudo pacman -U arcolinux-repo-explorer-23.09-05-x86_64.pkg.tar.zst
+wget https://github.com/DeltaCopy/arcolinux-repo-explorer/releases/download/pre-release-23.09-02/arcolinux-repo-explorer-23.09-02-x86_64.pkg.tar.zst
+sudo pacman -U arcolinux-repo-explorer-23.09-02-x86_64.pkg.tar.zst
 ```
 This will install the package into /usr/share/repoxp
 
