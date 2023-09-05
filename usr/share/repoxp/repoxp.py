@@ -19,7 +19,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
 base_dir = os.path.dirname(os.path.realpath(__file__))
 app_name = "ArcoLinux RepoXPlorer"
 app_desc = "Explore ArcoLinux Package Repos"
-
+github_repo = "https://github.com/DeltaCopy/arcolinux-repo-explorer"
 
 
 class Main(Gtk.Window):
@@ -508,6 +508,7 @@ class Main(Gtk.Window):
             "---------------------------------------------------------------------------"
         )
         print("Thanks for using ArcoRepoXP")
+        print("Report issues over on: %s" % github_repo)
 
         # un-comment below if this application ever becomes an official Arco product
 
