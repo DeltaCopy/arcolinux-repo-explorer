@@ -11,7 +11,7 @@ The following repositories are explorable:
 
 ###### Main Window
 
-![Main Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/45d3d7f6-1ddf-4d13-93fc-35965b93b06d)
+![Main Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/dfe486aa-fd74-472e-8c55-b17cae5c83c3)
 
 - Any installed packages with pending updates will be highlighted
 - Double clicking a package name displays more details
