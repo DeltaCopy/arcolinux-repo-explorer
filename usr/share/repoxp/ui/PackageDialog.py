@@ -20,7 +20,7 @@ class PackageDialog(Gtk.Dialog):
                 break
 
         self.set_resizable(True)
-        self.set_size_request(700, 500)
+        self.set_size_request(700, 300)
         self.set_modal(True)
 
         headerbar = Gtk.HeaderBar()
@@ -32,8 +32,8 @@ class PackageDialog(Gtk.Dialog):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         stack.set_transition_duration(350)
-        stack.set_hhomogeneous(False)
-        stack.set_vhomogeneous(False)
+        # stack.set_hhomogeneous(False)
+        # stack.set_vhomogeneous(False)
 
         stack_switcher = Gtk.StackSwitcher()
         stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
@@ -46,22 +46,20 @@ class PackageDialog(Gtk.Dialog):
 
         btn_close.connect("clicked", self.on_close)
 
-        vbox_padding = Gtk.Box(spacing=500)
+        vbox_padding = Gtk.Box()
 
-        vbox_close = Gtk.Box(spacing=6)
+        vbox_close = Gtk.Box()
 
         vbox_close.set_border_width(10)
-
         vbox_close.pack_start(btn_close, True, True, 0)
 
         zst_download_link = fn.get_download_link(package_name)
 
-        grid_package_details = Gtk.Grid()
-
         self.vbox.add(stack_switcher)
         self.vbox.add(stack)
-        self.vbox.pack_start(vbox_padding, True, True, 0)
-        self.vbox.add(vbox_close)
+
+        # self.vbox.pack_start(vbox_padding, True, True, 0)
+        self.vbox.pack_start(vbox_close, False, False, 0)
 
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
 
@@ -478,8 +476,10 @@ class PackageDialog(Gtk.Dialog):
             listbox.add(row_conflicts)
 
         scrolled_window_package_info = Gtk.ScrolledWindow()
-        scrolled_window_package_info.set_size_request(0, 400)
-        scrolled_window_package_info.set_propagate_natural_height(False)
+
+        # scrolled_window_package_info.set_propagate_natural_height(True)
+        scrolled_window_package_info.set_propagate_natural_width(True)
+        scrolled_window_package_info.set_size_request(0, 300)
 
         scrolled_window_package_info.set_policy(
             Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
@@ -487,9 +487,10 @@ class PackageDialog(Gtk.Dialog):
 
         scrolled_window_package_info.add(box_outer)
 
-        vbox_package_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox_package_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        vbox_package_info.pack_start(scrolled_window_package_info, True, True, 1)
+        vbox_package_info.pack_start(scrolled_window_package_info, True, True, 0)
+        # vbox_package_info.pack_start(vbox_close, True, True, 0)
 
         stack.add_titled(vbox_package_info, "Information", "Information")
 

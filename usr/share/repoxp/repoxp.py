@@ -414,7 +414,7 @@ class Main(Gtk.Window):
 
                     self.lbl_updates_today.set_selectable(True)
                     self.lbl_updates_today.set_markup(
-                        "Packages Updated Today = <b>%s</b>" % (fn.updates_today)
+                        "Installed Packages With Updates = <b>%s</b>" % (fn.update_count)
                     )
 
                     self.lbl_packages_installed_count.set_selectable(True)
@@ -424,7 +424,7 @@ class Main(Gtk.Window):
 
                     self.lbl_package_updates.set_selectable(True)
                     self.lbl_package_updates.set_markup(
-                        "Packages Built Today = <b>%s</b>" % str(fn.update_count)
+                        "Packages Built Today = <b>%s</b>" % str(fn.built_today)
                     )
 
                     self.treeview_packages.connect(
