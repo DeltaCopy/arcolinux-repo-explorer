@@ -84,13 +84,18 @@ class Main(Gtk.Window):
     def sync_data(self):
         fn.logger.info("Synchronizing pacman package database")
 
-        thread_pacman_sync_db = Thread(
-            target=fn.sync_package_db,
-            daemon=True,
-        )
-        thread_pacman_sync_db.start()
-        self.pacman_sync = fn.pacman_data_queue.get()
-        fn.pacman_data_queue.task_done()
+        try:
+            thread_pacman_sync_db = Thread(
+                target=fn.sync_package_db,
+                daemon=True,
+            )
+            thread_pacman_sync_db.start()
+            self.pacman_sync = fn.pacman_data_queue.get()
+
+        except Exception as e:
+            fn.logger.error(e)
+        finally:
+            fn.pacman_data_queue.task_done()
 
         try:
             thread_pacman_sync_data = Thread(
@@ -100,10 +105,11 @@ class Main(Gtk.Window):
             thread_pacman_sync_data.start()
 
             self.pacman_data = fn.pacman_data_queue.get()
-            fn.pacman_data_queue.task_done()
 
         except Exception as e:
             fn.logger.error(e)
+        finally:
+            fn.pacman_data_queue.task_done()
 
         fn.logger.info("Synchronizing pacman file database")
         try:
@@ -417,7 +423,8 @@ class Main(Gtk.Window):
 
                     self.lbl_updates_today.set_selectable(True)
                     self.lbl_updates_today.set_markup(
-                        "Installed Packages With Updates = <b>%s</b>" % (fn.update_count)
+                        "Installed Packages With Updates = <b>%s</b>"
+                        % (fn.update_count)
                     )
 
                     self.lbl_packages_installed_count.set_selectable(True)

@@ -184,9 +184,7 @@ class Functions(object):
                 timeout=self.process_timeout,
             )
 
-            if process_sync.returncode == 0:
-                self.pacman_data_queue.put(None)
-            else:
+            if process_sync.returncode != 0:
                 if process_sync.stdout:
                     out = str(process_sync.stdout.decode("utf-8"))
                     # self.logger.error(out)
@@ -681,6 +679,7 @@ class Functions(object):
                         package_replaces = []
                         package_licenses = []
                         package_groups = []
+
             self.pacman_data_queue.put(package_data)
 
         except Exception as e:
