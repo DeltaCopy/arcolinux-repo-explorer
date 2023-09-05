@@ -19,8 +19,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
 base_dir = os.path.dirname(os.path.realpath(__file__))
 app_name = "ArcoLinux RepoXPlorer"
 app_desc = "Explore ArcoLinux Package Repos"
-print("[INFO] : pkgver = pkgversion")
-print("[INFO] : pkgrel = pkgrelease")
+
 
 
 class Main(Gtk.Window):
@@ -61,6 +60,8 @@ class Main(Gtk.Window):
                     "Pacman DB Synchronized at <b>%s</b>"
                     % datetime.datetime.now().strftime("%H:%M:%S")
                 )
+            fn.logger.info("Package Version = pkgversion")
+            fn.logger.info("Package Release = pkgrelease")
             fn.logger.info("Loading GUI components")
             self.setup_gui()
             fn.logger.info("Application started")
