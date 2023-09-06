@@ -19,8 +19,8 @@ package() {
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
 	sed -i -e s/pkgversion/$pkgver/ $srcdir/${_pkgname}/usr/share/repoxp/repoxp.py
 	sed -i -e s/pkgrelease/$pkgrel/ $srcdir/${_pkgname}/usr/share/repoxp/repoxp.py
-	sed -i -e s/pkgversion/$pkgver/ $srcdir/${_pkgname}/usr/share/repoxp/AboutDialog.py
-	sed -i -e s/pkgrelease/$pkgrel/ $srcdir/${_pkgname}/usr/share/repoxp/AboutDialog.py
+	sed -i -e s/pkgversion/$pkgver/ $srcdir/${_pkgname}/usr/share/repoxp/ui/AboutDialog.py
+	sed -i -e s/pkgrelease/$pkgrel/ $srcdir/${_pkgname}/usr/share/repoxp/ui/AboutDialog.py
 
 	cp -r ${srcdir}/${_pkgname}/${_destname1} ${pkgdir}
 }
