@@ -7,8 +7,11 @@ import datetime
 import threading
 from threading import Thread
 from libs.Functions import Functions
+
+# UI
 from ui.PackageDialog import PackageDialog
 from ui.MessageDialog import MessageDialog
+from ui.AboutDialog import AboutDialog
 
 fn = Functions()
 
@@ -19,6 +22,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
 base_dir = os.path.dirname(os.path.realpath(__file__))
 app_name = "ArcoLinux RepoXPlorer"
 app_desc = "Explore ArcoLinux Package Repos"
+app_website = "https://debugthis.dev"
 github_repo = "https://github.com/DeltaCopy/arcolinux-repo-explorer"
 
 
@@ -41,6 +45,33 @@ class Main(Gtk.Window):
             headerbar.set_show_close_button(True)
 
             self.set_titlebar(headerbar)
+
+            toolbutton = Gtk.ToolButton()
+            toolbutton.set_icon_name("open-menu-symbolic.symbolic")
+
+            toolbutton.connect("clicked", self.on_settings_clicked)
+
+            headerbar.pack_end(toolbutton)
+
+            self.popover = Gtk.Popover()
+            self.popover.set_relative_to(toolbutton)
+
+            # button to show about dialog
+            modelbtn_about_app = Gtk.ModelButton()
+            modelbtn_about_app.connect("clicked", self.on_about_app_clicked)
+            modelbtn_about_app.set_name("modelbtn_popover")
+            modelbtn_about_app.props.centered = False
+            modelbtn_about_app.props.text = "About"
+
+            # popover vbox container
+            vbox_popover = Gtk.Box(spacing=0, orientation=Gtk.Orientation.VERTICAL)
+            vbox_popover.set_border_width(15)
+
+            vbox_popover.pack_start(modelbtn_about_app, False, True, 0)
+
+            self.popover.add(vbox_popover)
+            self.popover.set_position(Gtk.PositionType.BOTTOM)
+
             self.package_name = None
             self.search_activated = False
 
@@ -68,6 +99,29 @@ class Main(Gtk.Window):
 
         except Exception as e:
             fn.logger.error("Exception in Main() : %s" % e)
+
+    # =====================================================
+    #               SETTINGS CLICKED
+    # =====================================================
+
+    def on_settings_clicked(self, widget):
+        self.toggle_popover()
+
+    # show/hide popover
+    def toggle_popover(self):
+        if self.popover.get_visible():
+            self.popover.hide()
+        else:
+            self.popover.show_all()
+
+    def on_about_app_clicked(self, widget):
+        fn.logger.info("Showing About dialog")
+        self.toggle_popover()
+
+        about = AboutDialog(app_name, app_desc, github_repo, app_website)
+        about.run()
+        about.hide()
+        about.destroy()
 
     # =====================================================
     #               WINDOW KEY EVENT CTRL + F
