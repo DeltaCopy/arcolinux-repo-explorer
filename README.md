@@ -37,6 +37,7 @@ This is stored inside $HOME/repoxp/packages
 - OS: Arch Linux only
 - Python 3.11 or above
 - GTK3
+- Python Requests module installed (python-requests)
 - Pacman configured to use ArcoLinux repositories
 - Polkit running and configured correctly on system
 
