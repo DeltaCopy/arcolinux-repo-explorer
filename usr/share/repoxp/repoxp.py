@@ -91,8 +91,7 @@ class Main(Gtk.Window):
                     "Pacman DB Synchronized at <b>%s</b>"
                     % datetime.datetime.now().strftime("%H:%M:%S")
                 )
-            fn.logger.info("Package Version = pkgversion")
-            fn.logger.info("Package Release = pkgrelease")
+            fn.logger.info("Version = pkgversion-pkgrelease")
             fn.logger.info("Loading GUI components")
             self.setup_gui()
             fn.logger.info("Application started")
