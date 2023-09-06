@@ -378,7 +378,7 @@ class PackageDialog(Gtk.Dialog):
         self.lbl_dl_status.set_max_width_chars(50)
 
         switch_dl_zst = Gtk.Switch()
-        switch_dl_zst.set_valign(Gtk.Align.FILL)
+        #switch_dl_zst.set_valign(Gtk.Align.FILL)
         switch_dl_zst.connect(
             "notify::active",
             self.dl_zst_toggle,
@@ -396,14 +396,52 @@ class PackageDialog(Gtk.Dialog):
         lbl_padding_dl_zst2.set_text("   ")
 
         row_dl_zst = Gtk.ListBoxRow()
-        vbox_switch = Gtk.Box()
-        vbox_switch.pack_start(lbl_dl_zst_title, False, True, 0)
-        vbox_switch.pack_start(lbl_padding_dl_zst1, False, True, 0)
-        vbox_switch.pack_start(switch_dl_zst, False, True, 0)
-        vbox_switch.pack_start(lbl_padding_dl_zst2, False, True, 0)
-        vbox_switch.pack_start(self.lbl_dl_status, False, True, 0)
 
-        row_dl_zst.add(vbox_switch)
+        grid_switches = Gtk.Grid()
+        grid_switches.set_row_homogeneous(True)
+
+        grid_switches.attach(lbl_dl_zst_title,0,1,1,1)
+        grid_switches.attach_next_to(
+            lbl_padding_dl_zst1,
+            lbl_dl_zst_title,
+            Gtk.PositionType.RIGHT,
+            1,
+            1,
+        )
+
+        grid_switches.attach_next_to(
+            switch_dl_zst,
+            lbl_padding_dl_zst1,
+            Gtk.PositionType.RIGHT,
+            1,
+            1,
+        )
+
+        grid_switches.attach_next_to(
+            lbl_padding_dl_zst2,
+            switch_dl_zst,
+            Gtk.PositionType.RIGHT,
+            1,
+            1,
+        )
+
+        grid_switches.attach_next_to(
+            self.lbl_dl_status,
+            switch_dl_zst,
+            Gtk.PositionType.RIGHT,
+            1,
+            1,
+        )
+
+
+        # vbox_switch = Gtk.Box()
+        # vbox_switch.pack_start(lbl_dl_zst_title, False, True, 0)
+        # vbox_switch.pack_start(lbl_padding_dl_zst1, False, True, 0)
+        # vbox_switch.pack_start(switch_dl_zst, False, True, 0)
+        # vbox_switch.pack_start(lbl_padding_dl_zst2, False, True, 0)
+        # vbox_switch.pack_start(self.lbl_dl_status, False, True, 0)
+
+        row_dl_zst.add(grid_switches)
 
         listbox.add(row_dl_zst)
 
