@@ -378,7 +378,7 @@ class PackageDialog(Gtk.Dialog):
         self.lbl_dl_status.set_max_width_chars(50)
 
         switch_dl_zst = Gtk.Switch()
-        #switch_dl_zst.set_valign(Gtk.Align.FILL)
+        # switch_dl_zst.set_valign(Gtk.Align.FILL)
         switch_dl_zst.connect(
             "notify::active",
             self.dl_zst_toggle,
@@ -395,12 +395,15 @@ class PackageDialog(Gtk.Dialog):
         lbl_padding_dl_zst2 = Gtk.Label(xalign=0, yalign=0)
         lbl_padding_dl_zst2.set_text("   ")
 
+        lbl_padding_dl_zst3 = Gtk.Label(xalign=0, yalign=0)
+        lbl_padding_dl_zst3.set_text("   ")
+
         row_dl_zst = Gtk.ListBoxRow()
 
         grid_switches = Gtk.Grid()
         grid_switches.set_row_homogeneous(True)
 
-        grid_switches.attach(lbl_dl_zst_title,0,1,1,1)
+        grid_switches.attach(lbl_dl_zst_title, 0, 1, 1, 1)
         grid_switches.attach_next_to(
             lbl_padding_dl_zst1,
             lbl_dl_zst_title,
@@ -426,13 +429,20 @@ class PackageDialog(Gtk.Dialog):
         )
 
         grid_switches.attach_next_to(
-            self.lbl_dl_status,
+            lbl_padding_dl_zst3,
             switch_dl_zst,
             Gtk.PositionType.RIGHT,
             1,
             1,
         )
 
+        grid_switches.attach_next_to(
+            self.lbl_dl_status,
+            lbl_padding_dl_zst3,
+            Gtk.PositionType.RIGHT,
+            1,
+            1,
+        )
 
         # vbox_switch = Gtk.Box()
         # vbox_switch.pack_start(lbl_dl_zst_title, False, True, 0)
