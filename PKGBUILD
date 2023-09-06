@@ -14,7 +14,6 @@ makedepends=('git')
 options=(!strip !emptydirs)
 source=("${_pkgname}::git+${url}")
 sha256sums=('SKIP')
-install='readme.install'
 package() {
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
