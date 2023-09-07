@@ -240,8 +240,8 @@ class Functions(object):
             self.logger.error("Exception in sync_package_db(): %s" % e)
 
     # retrieve package lists
-    def get_packagelist(self, repo, pacman_data):
-        installed_packages_list = self.get_all_arco_packages_state()
+    def get_packagelist(self, repo, pacman_data_dict):
+        installed_packages_dict = self.get_all_arco_packages_state()
 
         packages = []
         self.installed_count = 0
@@ -253,18 +253,23 @@ class Functions(object):
         installed = False
         update_required = False
 
-        for package in pacman_data:
+        for package_name in pacman_data_dict:
+            package = pacman_data_dict[package_name]
+
             installed = False
             installed_version = ""
             update_required = False
             if package[0] == repo:
-                for installed_package in installed_packages_list:
-                    if installed_package[0] == package[1]:
+                for installed_package in installed_packages_dict:
+                    if installed_package == package_name:
                         installed = True
-                        installed_version = installed_package[1]
-                        update_required = installed_package[2]
+                        installed_version = installed_packages_dict[installed_package][
+                            1
+                        ]
+                        update_required = installed_packages_dict[installed_package][2]
 
                         break
+
                 if installed == True:
                     self.installed_count += 1
 
@@ -487,7 +492,7 @@ class Functions(object):
     # get all packages from specified repository
     def get_all_arco_packages_state(self):
         self.logger.debug("Getting package state data")
-        installed_packages = []
+        installed_packages_dict = {}
         update_required = False
 
         for repo in self.arco_repos:
@@ -510,24 +515,48 @@ class Functions(object):
                         if "[installed:" in package_info[3]:
                             update_required = True
                             installed_version = package_info[4].replace("]", "").strip()
-                            installed_packages.append(
-                                (package_info[1], installed_version, update_required)
+
+                            installed_packages_dict[package_info[1]] = (
+                                package_info[1],
+                                installed_version,
+                                update_required,
+                                repo,
                             )
+
+                            # installed_packages.append(
+                            #     (
+                            #         package_info[1],
+                            #         installed_version,
+                            #         update_required,
+                            #         repo,
+                            #     )
+                            # )
 
                     else:
                         update_required = False
 
                     if len(package_info) == 4:
                         if package_info[3] == "[installed]":
-                            # installed_packages.append(package_info[1])
-                            installed_packages.append(
-                                (package_info[1], package_info[2], update_required)
+                            installed_packages_dict[package_info[1]] = (
+                                package_info[1],
+                                package_info[2],
+                                update_required,
+                                repo,
                             )
+
+                            # installed_packages.append(
+                            #     (
+                            #         package_info[1],
+                            #         package_info[2],
+                            #         update_required,
+                            #         repo,
+                            #     )
+                            # )
 
             except Exception as e:
                 self.logger.error(e)
 
-        return installed_packages
+        return installed_packages_dict
 
     # obtain all files from specific package
     def get_package_files(self, package):
@@ -557,7 +586,7 @@ class Functions(object):
 
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
 
-            package_data = []
+            package_data_dict = {}
             package_name = "Unknown"
             package_version = "Unknown"
             package_description = "Unknown"
@@ -655,8 +684,8 @@ class Functions(object):
                 if line.startswith("Repository      :") and package_name != "Unknown":
                     package_repository = line.split("Repository      :")[1].strip()
                     if "arcolinux_" in package_repository:
-                        package_data.append(
-                            (
+                        if package_name not in package_data_dict:
+                            package_data_dict[package_name] = (
                                 package_repository,
                                 package_name,
                                 package_version,
@@ -673,14 +702,33 @@ class Functions(object):
                                 package_licenses,
                                 package_groups,
                             )
-                        )
+
+                        # package_data.append(
+                        #     (
+                        #         package_repository,
+                        #         package_name,
+                        #         package_version,
+                        #         package_build_date,
+                        #         package_dl_size,
+                        #         package_installed_size,
+                        #         package_description,
+                        #         package_arch,
+                        #         package_url,
+                        #         package_depends,
+                        #         package_conflicts,
+                        #         packager,
+                        #         package_replaces,
+                        #         package_licenses,
+                        #         package_groups,
+                        #     )
+                        # )
                         package_depends = []
                         package_conflicts = []
                         package_replaces = []
                         package_licenses = []
                         package_groups = []
 
-            self.pacman_data_queue.put(package_data)
+            self.pacman_data_queue.put(package_data_dict)
 
         except Exception as e:
             self.logger.error(e)

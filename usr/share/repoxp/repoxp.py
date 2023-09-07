@@ -92,6 +92,7 @@ class Main(Gtk.Window):
                     % datetime.datetime.now().strftime("%H:%M:%S")
                 )
             fn.logger.info("Version = pkgversion-pkgrelease")
+            fn.logger.info("Package Release = pkgrelease")
             fn.logger.info("Loading GUI components")
             self.setup_gui()
             fn.logger.info("Application started")
@@ -157,7 +158,7 @@ class Main(Gtk.Window):
             )
             thread_pacman_sync_data.start()
 
-            self.pacman_data = fn.pacman_data_queue.get()
+            self.pacman_data_dict = fn.pacman_data_queue.get()
 
         except Exception as e:
             fn.logger.error(e)
@@ -188,7 +189,7 @@ class Main(Gtk.Window):
         rb_arco_repo.set_name("rb_arco_repo")
 
         rb_arco_repo.connect(
-            "toggled", self.on_rb_toggled, self.pacman_data, "arcolinux_repo"
+            "toggled", self.on_rb_toggled, self.pacman_data_dict, "arcolinux_repo"
         )
 
         rb_arco_3rdparty_repo = Gtk.RadioButton.new_from_widget(rb_arco_repo)
@@ -196,7 +197,7 @@ class Main(Gtk.Window):
         rb_arco_3rdparty_repo.connect(
             "toggled",
             self.on_rb_toggled,
-            self.pacman_data,
+            self.pacman_data_dict,
             "arcolinux_repo_3party",
         )
         rb_arco_3rdparty_repo.set_name("rb_arco_3rdparty_repo")
@@ -206,7 +207,7 @@ class Main(Gtk.Window):
         rb_arco_xl_repo.connect(
             "toggled",
             self.on_rb_toggled,
-            self.pacman_data,
+            self.pacman_data_dict,
             "arcolinux_repo_xlarge",
         )
         rb_arco_xl_repo.set_name("rb_arco_xl_repo")
@@ -216,7 +217,7 @@ class Main(Gtk.Window):
         rb_arco_testing_repo.connect(
             "toggled",
             self.on_rb_toggled,
-            self.pacman_data,
+            self.pacman_data_dict,
             "arcolinux_repo_testing",
         )
 
@@ -247,21 +248,21 @@ class Main(Gtk.Window):
         # add vbox to the main window
         self.add(self.vbox)
 
-        self.get_packages("arcolinux_repo", self.pacman_data)
+        self.get_packages("arcolinux_repo", self.pacman_data_dict)
 
     def on_search_activated(self, searchentry):
         search_term = searchentry.get_text()
 
         if len(search_term) == 0:
             self.search_activated = False
-            self.get_packages(self.repo_selected, self.pacman_data)
+            self.get_packages(self.repo_selected, self.pacman_data_dict)
         else:
             # if the string is completely whitespace ignore searching
             if not search_term.isspace():
                 try:
                     if len(search_term.rstrip().lstrip()) > 0:
                         self.treestore_packages = fn.get_packagelist(
-                            self.repo_selected, self.pacman_data
+                            self.repo_selected, self.pacman_data_dict
                         )
                         self.treestore_packages = fn.search(
                             search_term, self.treestore_packages
@@ -269,7 +270,7 @@ class Main(Gtk.Window):
 
                         if len(self.treestore_packages) > 0:
                             self.search_activated = True
-                            self.get_packages(self.repo_selected, self.pacman_data)
+                            self.get_packages(self.repo_selected, self.pacman_data_dict)
                         else:
                             message_dialog = MessageDialog(
                                 "Search Results",
@@ -287,7 +288,7 @@ class Main(Gtk.Window):
 
     def on_search_cleared(self, searchentry, icon_pos, event):
         self.search_activated = False
-        self.get_packages(self.repo_selected, self.pacman_data)
+        self.get_packages(self.repo_selected, self.pacman_data_dict)
 
     # attached to radio buttons toggled signal
     def on_rb_toggled(self, rb, pacman_data, repo_name):
@@ -558,7 +559,7 @@ class Main(Gtk.Window):
                     files_list = "No files found"
 
                 package_dialog = PackageDialog(
-                    package_name, self.pacman_data, files_list
+                    package_name, self.pacman_data_dict, files_list
                 )
                 package_dialog.show_all()
 
@@ -591,7 +592,7 @@ class Main(Gtk.Window):
                 % datetime.datetime.now().strftime("%H:%M:%S")
             )
 
-        self.get_packages(self.repo_selected, self.pacman_data)
+        self.get_packages(self.repo_selected, self.pacman_data_dict)
 
 
 # ====================================================================

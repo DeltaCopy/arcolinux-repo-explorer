@@ -11,13 +11,12 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Pango
 
 # A message dialog window to show package details
 class PackageDialog(Gtk.Dialog):
-    def __init__(self, package_name, pacman_data, files_list):
+    def __init__(self, package_name, pacman_data_dict, files_list):
         Gtk.Dialog.__init__(self)
 
         package = None
-        for package in pacman_data:
-            if package[1] == package_name:
-                break
+
+        package = pacman_data_dict[package_name]
 
         self.set_resizable(True)
         self.set_size_request(700, 300)
