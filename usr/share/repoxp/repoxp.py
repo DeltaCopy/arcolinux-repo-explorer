@@ -231,18 +231,18 @@ class Main(Gtk.Window):
         self.search_entry.connect("activate", self.on_search_activated)
         self.search_entry.connect("icon-release", self.on_search_cleared)
 
-        hbox_repo = Gtk.Box(spacing=6)
-        hbox_repo.set_border_width(10)
+        vbox_repo = Gtk.Box(spacing=6)
+        vbox_repo.set_border_width(10)
 
         # pack the radio buttons
-        hbox_repo.pack_start(rb_arco_repo, False, False, 0)
-        hbox_repo.pack_start(rb_arco_3rdparty_repo, False, False, 0)
-        hbox_repo.pack_start(rb_arco_xl_repo, False, False, 0)
-        hbox_repo.pack_start(rb_arco_testing_repo, False, False, 0)
+        vbox_repo.pack_start(rb_arco_repo, False, False, 0)
+        vbox_repo.pack_start(rb_arco_3rdparty_repo, False, False, 0)
+        vbox_repo.pack_start(rb_arco_xl_repo, False, False, 0)
+        vbox_repo.pack_start(rb_arco_testing_repo, False, False, 0)
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
-        self.vbox.pack_start(hbox_repo, False, True, 0)
+        self.vbox.pack_start(vbox_repo, False, True, 0)
         self.vbox.pack_start(self.search_entry, False, False, 0)
 
         # add vbox to the main window
