@@ -247,7 +247,7 @@ class Functions(object):
         self.installed_count = 0
         self.update_count = 0
         self.built_today = 0
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = datetime.today().date()
 
         installed_version = ""
         installed = False
@@ -274,6 +274,7 @@ class Functions(object):
                     self.installed_count += 1
 
                 build_date = package[3]
+
                 if len(build_date) > 0:
                     try:
                         if (
@@ -283,6 +284,7 @@ class Functions(object):
                             == today
                         ):
                             self.built_today += 1
+
                     except ValueError as ve:
                         # fn.logger.error("ValueError in compare_install_date: %s" % ve)
                         # compare fails due to the format of the datetime string, which hasn't been tested

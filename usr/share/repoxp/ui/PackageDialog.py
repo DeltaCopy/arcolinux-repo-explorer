@@ -8,6 +8,8 @@ fn = Functions()
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Pango
 
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 
 # A message dialog window to show package details
 class PackageDialog(Gtk.Dialog):
@@ -25,6 +27,11 @@ class PackageDialog(Gtk.Dialog):
         headerbar = Gtk.HeaderBar()
         headerbar.set_title("%s" % package_name)
         headerbar.set_show_close_button(True)
+        pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            os.path.join(base_dir, "images/search.png"), 20, 20
+        )
+        app_image = Gtk.Image().new_from_pixbuf(pixbuf)
+        headerbar.pack_start(app_image)
 
         self.set_titlebar(headerbar)
 

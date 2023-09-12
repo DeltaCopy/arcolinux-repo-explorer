@@ -15,26 +15,32 @@ class AboutDialog(Gtk.Dialog):
 
         app_title = "About %s" % app_name
 
-        app_secondary_message = "Explore Packages on your ArcoLinux system"
+        app_secondary_message = "Explore Packages on your ArcoLinux system from only the ArcoLinux repositories"
         app_secondary_description = "Report issues to make it even better"
         app_version = "pkgversion-pkgrelease"
 
         app_authors = []
         app_authors.append(("Fennec (DeltaCopy)", None))
 
-        # pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
-        #     os.path.join(base_dir, "images/sofirem.png"), 100, 100
-        # )
-        # app_image = Gtk.Image().new_from_pixbuf(pixbuf)
+        pixbuf1 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            os.path.join(base_dir, "images/search.png"), 100, 100
+        )
+        app_image1 = Gtk.Image().new_from_pixbuf(pixbuf1)
 
         self.set_resizable(False)
         self.set_size_request(560, 350)
-        # self.set_icon_from_file(os.path.join(base_dir, "images/sofirem.png"))
+        self.set_icon_from_file(os.path.join(base_dir, "images/search.png"))
         self.set_border_width(10)
 
         headerbar = Gtk.HeaderBar()
         headerbar.set_show_close_button(True)
         headerbar.set_title(app_title)
+        pixbuf2 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            os.path.join(base_dir, "images/search.png"), 20, 20
+        )
+        app_image2 = Gtk.Image().new_from_pixbuf(pixbuf2)
+        headerbar.pack_start(app_image2)
+
         self.set_titlebar(headerbar)
 
         btn_about_close = Gtk.Button(label="OK")
@@ -66,7 +72,7 @@ class AboutDialog(Gtk.Dialog):
         lbl_main_padding = Gtk.Label(xalign=0, yalign=0)
 
         ivbox_about = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        # ivbox_about.pack_start(app_image, True, True, 0)
+        ivbox_about.pack_start(app_image1, True, True, 0)
         ivbox_about.pack_start(lbl_main_padding, True, True, 0)
         ivbox_about.pack_start(lbl_main_title, True, True, 0)
         ivbox_about.pack_start(lbl_version, True, True, 0)
@@ -93,6 +99,14 @@ class AboutDialog(Gtk.Dialog):
         lbl_github_title = Gtk.Label(xalign=0, yalign=0)
         lbl_github_title.set_markup("<b>GitHub  </b>")
 
+        lbl_author_title = Gtk.Label(xalign=0, yalign=0)
+        lbl_author_title.set_markup("<b>Author  </b>")
+
+        lbl_author_value = Gtk.Label(xalign=0, yalign=0)
+        lbl_author_value.set_text("Fennec")
+        lbl_author_value.set_selectable(True)
+        lbl_author_value.set_justify(Gtk.Justification.LEFT)
+
         lbl_github_value = Gtk.Label(xalign=0, yalign=0)
         lbl_github_value.set_text(app_github)
         lbl_github_value.set_selectable(True)
@@ -108,40 +122,12 @@ class AboutDialog(Gtk.Dialog):
             lbl_github_value, lbl_github_title, Gtk.PositionType.RIGHT, 20, 1
         )
 
-        stack.add_titled(grid_support, "Support", "Support")
-
-        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        box_outer.set_border_width(10)
-
-        lbl_padding2 = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding2.set_text(" ")
-
-        lbl_padding3 = Gtk.Label(xalign=0, yalign=0)
-        lbl_padding3.set_text(" ")
-
-        lbl_authors_title = Gtk.Label(xalign=0, yalign=0)
-        lbl_authors_title.set_text(
-            "The following people have contributed to the development of %s" % app_name
+        grid_support.attach(lbl_author_title, 0, 5, 1, 1)
+        grid_support.attach_next_to(
+            lbl_author_value, lbl_author_title, Gtk.PositionType.RIGHT, 20, 1
         )
 
-        listbox = Gtk.ListBox()
-        listbox.set_selection_mode(Gtk.SelectionMode.NONE)
-
-        box_outer.pack_start(lbl_authors_title, True, True, 0)
-        box_outer.pack_start(listbox, True, True, 0)
-
-        row_authors = Gtk.ListBoxRow()
-        vbox_authors = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        row_authors.add(vbox_authors)
-
-        lbl_author1 = Gtk.Label(xalign=0, yalign=0)
-        lbl_author1.set_text("Fennec (DeltaCopy)")
-
-        vbox_authors.pack_start(lbl_author1, True, True, 0)
-
-        listbox.add(row_authors)
-
-        stack.add_titled(box_outer, "Authors", "Authors")
+        stack.add_titled(grid_support, "Support", "Support")
 
         self.connect("response", self.on_response)
 

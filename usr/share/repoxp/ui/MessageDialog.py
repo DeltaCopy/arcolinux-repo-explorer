@@ -4,10 +4,9 @@ import os
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# base_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 class MessageDialog(Gtk.Dialog):
@@ -28,13 +27,19 @@ class MessageDialog(Gtk.Dialog):
         self.set_border_width(10)
 
         self.set_titlebar(headerbar)
-        # self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
 
         btn_ok = Gtk.Button(label="OK")
         btn_ok.set_size_request(100, 30)
         btn_ok.connect("clicked", on_message_dialog_ok_response, self)
         btn_ok.set_halign(Gtk.Align.END)
-        # self.set_icon_from_file(os.path.join(base_dir, "images/sofirem.png"))
+        self.set_icon_from_file(os.path.join(base_dir, "images/search.png"))
+
+        pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            os.path.join(base_dir, "images/search.png"), 20, 20
+        )
+        app_image = Gtk.Image().new_from_pixbuf(pixbuf)
+        headerbar.pack_start(app_image)
 
         infobar = Gtk.InfoBar()
 

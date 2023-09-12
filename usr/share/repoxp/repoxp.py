@@ -36,6 +36,7 @@ class Main(Gtk.Window):
             self.set_position(Gtk.WindowPosition.CENTER)
 
             self.set_default_size(800, 500)
+            self.set_icon_from_file(os.path.join(base_dir, "images/search.png"))
 
             # ctrl+f give focus to search entry
             self.connect("key-press-event", self.on_keypress_event)
