@@ -11,7 +11,7 @@ The following repositories are explorable:
 
 ###### Main Window
 
-![Main Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/dfe486aa-fd74-472e-8c55-b17cae5c83c3)
+![Main Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/5861e1be-5f5b-40e0-bd9b-2706713b66d2)
 
 - Any installed packages with pending updates will be highlighted
 - Double clicking a package name displays more details
@@ -19,18 +19,23 @@ The following repositories are explorable:
 
 ###### Package Details Window
 
-![Package Details Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/adc6cd4b-5709-44a6-9436-8b71ae6ae87a)
+![Package Details Window](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/25967b8f-fded-4324-97a9-852e69af8cda)
 
 ###### Download option
 
-![Download Package](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/e64964b1-4f9a-4946-b59f-ed4dba157f92)
+![Download Package](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/b0947d7c-0cac-4002-ab11-f8f44bb9bb4f)
 
 The download package option lets you download the associated .zst package file to disk for offline installations.
 
 This is stored inside $HOME/repoxp/packages
 
 ###### Files view
-![Files Stack](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/a088600d-576e-4137-b202-c50a44985966)
+![Files Stack](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/a3480b2a-3a2b-4e7d-8b5a-6dbe8ad9e3e1)
+
+###### Searching
+![Searching](https://github.com/DeltaCopy/arcolinux-repo-explorer/assets/121581829/d32b59e7-9f2a-4bf2-945d-0924e564806a)
+
+Fuzzy searching based on entered string.
 
 # Requirements
 
