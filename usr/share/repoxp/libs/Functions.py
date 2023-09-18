@@ -19,6 +19,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib
 class Functions(object):
     pacman_data_queue = Queue()
     package_treestore_queue = Queue()
+    package_files_queue = Queue()
 
     arco_repos = [
         "arcolinux_repo_testing",
@@ -83,28 +84,17 @@ class Functions(object):
             self.logger.error(e)
 
     # download the corresponding zst file
-    def get_zst(self, url, filename):
+    def get_zst(self, url, filename, status_label, widget):
         try:
+            status_label.set_markup("<b>Download started</b>")
             # package is in the pacman cache use that one
             if "file://" in url:
                 shutil.copyfile(url.replace("file://", ""), filename)
                 self.permissions(self.zst_download_path)
-                return "completed"
+                status_label.set_markup("<b>File already exists in pacman cache</b>")
+                widget.set_sensitive(False)
             else:
-                requests_queue = Queue()
-                dl_zst_thread = Thread(
-                    target=self.download_zst_file,
-                    args=(
-                        url,
-                        requests_queue,
-                    ),
-                    daemon=True,
-                )
-
-                dl_zst_thread.start()
-
-                r = requests_queue.get()
-                requests_queue.task_done()
+                r = self.download_zst_file(url)
 
                 if type(r) is requests.exceptions.ConnectionError:
                     message_dialog = MessageDialog(
@@ -117,33 +107,33 @@ class Functions(object):
                     )
 
                     message_dialog.show_all()
-                    return "ConnectionError"
+                    status_label.set_markup("<b>ConnectionError</b>")
+                else:
+                    if r.status_code == 200:
+                        with open(filename, "wb") as zst_file:
+                            for chunk in r.iter_content(chunk_size=1024):
+                                if chunk:
+                                    zst_file.write(chunk)
 
-                if r.status_code == 200:
-                    with open(filename, "wb") as zst_file:
-                        for chunk in r.iter_content(chunk_size=1024):
-                            if chunk:
-                                zst_file.write(chunk)
-
-                    if os.path.exists(filename):
-                        self.permissions(self.zst_download_path)
-                        return "completed"
+                        if os.path.exists(filename):
+                            self.permissions(self.zst_download_path)
+                            status_label.set_markup("<b>Download completed</b>")
+                            widget.set_sensitive(False)
+                        else:
+                            status_label.set_markup("<b>Download failed</b>")
 
                     else:
-                        return "failed"
+                        message_dialog = MessageDialog(
+                            "Error",
+                            "Download failed",
+                            r.text,
+                            "",
+                            "error",
+                            True,
+                        )
 
-                else:
-                    message_dialog = MessageDialog(
-                        "Error",
-                        "Download failed",
-                        r.text,
-                        "",
-                        "error",
-                        True,
-                    )
-
-                    message_dialog.show_all()
-                    return "failed"
+                        message_dialog.show_all()
+                        status_label.set_markup("<b>Download failed</b>")
 
         except Exception as e:
             self.logger.error(e)
@@ -151,7 +141,7 @@ class Functions(object):
             message_dialog = MessageDialog(
                 "Error",
                 "Download failed",
-                r.text,
+                e,
                 "",
                 "error",
                 True,
@@ -159,17 +149,18 @@ class Functions(object):
 
             message_dialog.show_all()
 
-            return "failed"
+            status_label.set_markup("<b>Download failed</b>")
 
-    def download_zst_file(self, url, requests_queue):
+    def download_zst_file(self, url):
         try:
             r = requests.get(
                 url, headers=self.headers, allow_redirects=True, stream=True
             )
 
-            requests_queue.put(r)
+            return r
         except Exception as e:
-            requests_queue.put(e)
+            self.logger.error(e)
+            return e
 
     # run pacman sync files database - pacman -Fy
     def sync_file_db(self):
@@ -187,11 +178,11 @@ class Functions(object):
             if process_sync.returncode != 0:
                 if process_sync.stdout:
                     out = str(process_sync.stdout.decode("utf-8"))
-                    # self.logger.error(out)
+                    self.logger.error(out)
 
                     message_dialog = MessageDialog(
                         "Error",
-                        "Pacman file syncronization failed",
+                        "Pacman file synchronization failed",
                         out,
                         "",
                         "error",
@@ -199,7 +190,7 @@ class Functions(object):
                     )
 
                     message_dialog.show_all()
-                    self.pacman_data_queue.put("Pacman file syncronization failed")
+                    self.pacman_data_queue.put("Pacman file synchronization failed")
 
         except Exception as e:
             self.logger.error("Exception in sync_package_db(): %s" % e)
@@ -226,7 +217,7 @@ class Functions(object):
 
                     message_dialog = MessageDialog(
                         "Error",
-                        "Pacman syncronization failed",
+                        "Pacman synchronization failed",
                         out,
                         "",
                         "error",
@@ -234,7 +225,7 @@ class Functions(object):
                     )
 
                     message_dialog.show_all()
-                    self.pacman_data_queue.put("Pacman syncronization failed")
+                    self.pacman_data_queue.put("Pacman synchronization failed")
 
         except Exception as e:
             self.logger.error("Exception in sync_package_db(): %s" % e)
@@ -270,7 +261,7 @@ class Functions(object):
 
                         break
 
-                if installed == True:
+                if installed is True:
                     self.installed_count += 1
 
                 build_date = package[3]
@@ -572,14 +563,15 @@ class Functions(object):
 
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
 
-            return out.decode("utf-8").splitlines()
+            self.package_files_queue.put((out.decode("utf-8").splitlines()))
+            # return out.decode("utf-8").splitlines()
             # self.pacman_data_queue.put(out.decode("utf-8").splitlines())
         except Exception as e:
             self.logger.error(e)
 
     # retrieve package info
     def get_package_sync_data(self):
-        self.logger.info("Getting package syncronization data")
+        self.logger.info("Getting package synchronization data")
         query_str = ["pacman", "-Si"]
         try:
             process_pkg_query = subprocess.Popen(

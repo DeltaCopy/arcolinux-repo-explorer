@@ -41,6 +41,9 @@ class Main(Gtk.Window):
             # ctrl+f give focus to search entry
             self.connect("key-press-event", self.on_keypress_event)
 
+            self.pacman_sync = None
+            self.pacman_data_dict = None
+
             headerbar = Gtk.HeaderBar()
             headerbar.set_title("%s" % app_name)
             headerbar.set_show_close_button(True)
@@ -138,7 +141,7 @@ class Main(Gtk.Window):
 
     def sync_data(self):
         fn.logger.info("Synchronizing pacman package database")
-
+        sync_failed = False
         try:
             thread_pacman_sync_db = Thread(
                 target=fn.sync_package_db,
@@ -149,8 +152,14 @@ class Main(Gtk.Window):
 
         except Exception as e:
             fn.logger.error(e)
+
         finally:
             fn.pacman_data_queue.task_done()
+
+        # to avoid 2 message dialogs opening with sync/file errors capture sync_failed flag
+        # if there is a failure in the pacman sync then no need to show failure on file sync too
+        if self.pacman_sync == "Pacman synchronization failed":
+            sync_failed = True
 
         try:
             thread_pacman_sync_data = Thread(
@@ -163,18 +172,20 @@ class Main(Gtk.Window):
 
         except Exception as e:
             fn.logger.error(e)
+
         finally:
             fn.pacman_data_queue.task_done()
 
-        fn.logger.info("Synchronizing pacman file database")
-        try:
-            thread_pacman_sync_file = Thread(
-                target=fn.sync_file_db,
-                daemon=True,
-            )
-            thread_pacman_sync_file.start()
-        except Exception as e:
-            fn.logger.error(e)
+        if sync_failed is False:
+            fn.logger.info("Synchronizing pacman file database")
+            try:
+                thread_pacman_sync_file = Thread(
+                    target=fn.sync_file_db,
+                    daemon=True,
+                )
+                thread_pacman_sync_file.start()
+            except Exception as e:
+                fn.logger.error(e)
 
     # setup gui components on the main window
     def setup_gui(self):
@@ -554,14 +565,23 @@ class Main(Gtk.Window):
         if tree_iter:
             package_name = model.get_value(tree_iter, 0)
             if package_name:
-                files_list = fn.get_package_files(package_name)
+                # spawn thread to get files owned by a particular package
+                thread_package_files = Thread(
+                    target=fn.get_package_files,
+                    args=(package_name,),
+                    daemon=True,
+                )
+                thread_package_files.start()
+
+                files_list = fn.package_files_queue.get()
+                fn.package_files_queue.task_done()
 
                 if len(files_list) == 0:
                     files_list = "No files found"
 
-                package_dialog = PackageDialog(
-                    package_name, self.pacman_data_dict, files_list
-                )
+                package = self.pacman_data_dict[package_name]
+                package_dialog = PackageDialog(package, package_name, files_list)
+
                 package_dialog.show_all()
 
     def on_close(self, widget, data):

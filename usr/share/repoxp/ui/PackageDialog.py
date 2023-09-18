@@ -13,13 +13,8 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # A message dialog window to show package details
 class PackageDialog(Gtk.Dialog):
-    def __init__(self, package_name, pacman_data_dict, files_list):
+    def __init__(self, package, package_name, files_list):
         Gtk.Dialog.__init__(self)
-
-        package = None
-
-        package = pacman_data_dict[package_name]
-
         self.set_resizable(True)
         self.set_size_request(700, 300)
         self.set_modal(True)
@@ -38,8 +33,6 @@ class PackageDialog(Gtk.Dialog):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         stack.set_transition_duration(350)
-        # stack.set_hhomogeneous(False)
-        # stack.set_vhomogeneous(False)
 
         stack_switcher = Gtk.StackSwitcher()
         stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
@@ -576,23 +569,23 @@ class PackageDialog(Gtk.Dialog):
     def dl_zst_toggle(self, widget, data, url, filename):
         try:
             if widget.get_active() == True:
-                dl_status = fn.get_zst(url, filename)
+                # spawn thread to download .zst package installation file
+                thread_download_zst = Thread(
+                    target=fn.get_zst,
+                    args=(
+                        url,
+                        filename,
+                        self.lbl_dl_status,
+                        widget,
+                    ),
+                    daemon=True,
+                )
+                thread_download_zst.start()
 
-                if dl_status == "completed":
-                    widget.set_sensitive(False)
-                    self.lbl_dl_status.set_markup("<b>Download completed </b>")
-
-                elif dl_status == "ConnectionError":
-                    widget.set_sensitive(False)
-                    self.lbl_dl_status.set_markup(
-                        "<b>Download failed: ConnectionError </b>"
-                    )
-                else:
-                    widget.set_active(False)
-                    self.lbl_dl_status.set_markup("<b>Download failed </b>")
         except Exception as e:
             widget.set_active(True)
-            self.lbl_dl_status.set_markup("<b>Download failed </b>")
+            self.lbl_dl_status.set_markup("<b>Download failed</b>")
+
             fn.logger.error(e)
 
     def on_close(self, widget):
