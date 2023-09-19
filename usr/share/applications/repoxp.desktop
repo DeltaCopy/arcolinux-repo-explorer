@@ -1,0 +1,13 @@
+ 
+[Desktop Entry]
+Name=ArcoLinux RepoXPlorer
+GenericName=ArcoLinux RepoXPlorer
+X-GNOME-FullName=ArcoLinux RepoXPlorer
+Comment=ArcoLinux RepoXPlorer - Explore ArcoLinux Pacman repositories
+Exec=/usr/bin/repoxp
+Icon=arcolinux-repoxp
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Utility;Settings;Security;X-GNOME-Settings-Panel;X-GNOME-SystemSettings;X-Unity-Settings-Panel;X-XFCE-SettingsDialog;X-XFCE-SystemSettings;
+Keywords=pacman;repo;explorer
+StartupNotify=true
