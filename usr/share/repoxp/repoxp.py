@@ -352,6 +352,7 @@ class Main(Gtk.Window):
             self.lbl_packages_repo = Gtk.Label(xalign=0, yalign=0)
             self.lbl_package_updates = Gtk.Label(xalign=0, yalign=0)
             self.lbl_updates_today = Gtk.Label(xalign=0, yalign=0)
+            self.scrolled_window = Gtk.ScrolledWindow()
 
             btn_quit = Gtk.Button(label="Quit")
             btn_quit.set_size_request(100, 30)
@@ -506,8 +507,6 @@ class Main(Gtk.Window):
                     self.treeview_packages.connect(
                         "row-activated", self.on_row_activated
                     )
-
-                    self.scrolled_window = Gtk.ScrolledWindow()
 
                     self.scrolled_window.set_propagate_natural_height(True)
                     self.scrolled_window.set_propagate_natural_width(True)
