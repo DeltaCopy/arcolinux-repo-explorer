@@ -224,7 +224,7 @@ class Main(Gtk.Window):
         )
         rb_arco_xl_repo.set_name("rb_arco_xl_repo")
 
-        rb_arco_testing_repo = Gtk.RadioButton.new_from_widget(rb_arco_3rdparty_repo)
+        rb_arco_testing_repo = Gtk.RadioButton.new_from_widget(rb_arco_repo)
         rb_arco_testing_repo.set_label("arcolinux_repo_testing")
         rb_arco_testing_repo.connect(
             "toggled",
@@ -232,7 +232,6 @@ class Main(Gtk.Window):
             self.pacman_data_dict,
             "arcolinux_repo_testing",
         )
-
         rb_arco_testing_repo.set_name("rb_arco_testing_repo")
 
         # search text

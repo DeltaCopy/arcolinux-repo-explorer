@@ -509,21 +509,16 @@ class Functions(object):
                             update_required = True
                             installed_version = package_info[4].replace("]", "").strip()
 
-                            installed_packages_dict[package_info[1]] = (
-                                package_info[1],
-                                installed_version,
-                                update_required,
-                                repo,
-                            )
+                            if package_info[1] not in installed_packages_dict.keys():
+                                # print("%s, %s" % (repo, package_info))
+                                # print(installed_packages_dict[package_info[1]])
 
-                            # installed_packages.append(
-                            #     (
-                            #         package_info[1],
-                            #         installed_version,
-                            #         update_required,
-                            #         repo,
-                            #     )
-                            # )
+                                installed_packages_dict[package_info[1]] = (
+                                    package_info[1],
+                                    installed_version,
+                                    update_required,
+                                    repo,
+                                )
 
                     else:
                         update_required = False
@@ -537,15 +532,6 @@ class Functions(object):
                                 repo,
                             )
 
-                            # installed_packages.append(
-                            #     (
-                            #         package_info[1],
-                            #         package_info[2],
-                            #         update_required,
-                            #         repo,
-                            #     )
-                            # )
-
             except Exception as e:
                 self.logger.error(e)
 
@@ -558,7 +544,10 @@ class Functions(object):
 
         try:
             process_pkg_query = subprocess.Popen(
-                query_str, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                query_str,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
 
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
@@ -575,7 +564,10 @@ class Functions(object):
         query_str = ["pacman", "-Si"]
         try:
             process_pkg_query = subprocess.Popen(
-                query_str, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                query_str,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
 
             out, err = process_pkg_query.communicate(timeout=self.process_timeout)
@@ -585,7 +577,6 @@ class Functions(object):
             package_version = "Unknown"
             package_description = "Unknown"
             package_repository = "Unknown"
-            package_dl_link = "Unknown"
             package_build_date = "Unknown"
             package_dl_size = "Unknown"
             package_installed_size = "Unknown"
@@ -619,6 +610,9 @@ class Functions(object):
 
                 if line.startswith("Architecture    :"):
                     package_arch = line.split("Architecture    :")[1].strip()
+
+                if line.startswith("Repository      :"):
+                    package_repository = line.split("Repository      :")[1].strip()
 
                 if line.startswith("URL             :"):
                     package_url = line.split("URL             :")[1].strip()
@@ -675,8 +669,8 @@ class Functions(object):
                 if line.startswith("Packager        :"):
                     packager = line.split("Packager        :")[1].strip()
 
-                if line.startswith("Repository      :") and package_name != "Unknown":
-                    package_repository = line.split("Repository      :")[1].strip()
+                # a new line distinguishes a new package entry
+                if len(line) == 0:
                     if "arcolinux_" in package_repository:
                         if package_name not in package_data_dict:
                             package_data_dict[package_name] = (
@@ -697,25 +691,6 @@ class Functions(object):
                                 package_groups,
                             )
 
-                        # package_data.append(
-                        #     (
-                        #         package_repository,
-                        #         package_name,
-                        #         package_version,
-                        #         package_build_date,
-                        #         package_dl_size,
-                        #         package_installed_size,
-                        #         package_description,
-                        #         package_arch,
-                        #         package_url,
-                        #         package_depends,
-                        #         package_conflicts,
-                        #         packager,
-                        #         package_replaces,
-                        #         package_licenses,
-                        #         package_groups,
-                        #     )
-                        # )
                         package_depends = []
                         package_conflicts = []
                         package_replaces = []
