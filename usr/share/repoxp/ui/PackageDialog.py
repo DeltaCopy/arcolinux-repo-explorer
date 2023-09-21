@@ -278,6 +278,8 @@ class PackageDialog(Gtk.Dialog):
 
         lbl_licenses_value = Gtk.Label(xalign=0, yalign=0)
         lbl_licenses_value.set_text(" ".join(package[13]))
+        lbl_licenses_value.set_line_wrap(True)
+        lbl_licenses_value.set_max_width_chars(50)
         lbl_licenses_value.set_selectable(True)
 
         row_package_licenses = Gtk.ListBoxRow()

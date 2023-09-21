@@ -60,8 +60,8 @@ If those steps fail use the offline method described below.
 # Offline installation method
 
 ```bash
-wget https://github.com/DeltaCopy/arcolinux-repo-explorer/releases/download/release-23.09-05/arcolinux-repo-explorer-23.09-06-x86_64.pkg.tar.zst
-sudo pacman -U arcolinux-repo-explorer-23.09-06-x86_64.pkg.tar.zst
+wget https://github.com/DeltaCopy/arcolinux-repo-explorer/releases/download/release-23.09-05/arcolinux-repo-explorer-23.09-07-x86_64.pkg.tar.zst
+sudo pacman -U arcolinux-repo-explorer-23.09-07-x86_64.pkg.tar.zst
 ```
 This will install the package into /usr/share/repoxp
 
